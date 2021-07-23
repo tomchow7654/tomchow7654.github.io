@@ -1,9 +1,55 @@
 <!DOCTYPE html>
 <html>
 <title>ACNH item id lookup (Multi-language)</title>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-purple.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
+	@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500&display=swap');
+
+	body {
+		height: 100vh;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	footer {
+		margin-top: auto;
+	}
+
+	body,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-family: 'Noto Sans TC', sans-serif;
+	}
+
+	#copy-box {
+		position: absolute;
+		z-index: -1;
+		top: -50px;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	#multiple-item-ids {
+		z-index: 5;
+		position: fixed;
+		left: 0;
+		bottom: 0;
+		width: 100vw;
+	}
+
+	#multiple-item-ids>div {
+		margin: 0 auto;
+	}
+
 	.w3-card {
 		transition: all .4s;
 	}
@@ -28,17 +74,71 @@
 </style>
 
 <body>
-	<main id="app">
-		<div class="w3-container w3-purple w3-card">
+	<div id="app">
+		<header class="w3-container w3-theme-l4 w3-card">
 			<h1>{{ title }}</h1>
-		</div>
+		</header>
+		<main>
+			<form class="w3-container w3-section">
+				<p>
+					<label>Language</label>
+					<select v-model="lang" class="w3-select" name="option">
+						<option value="" disabled selected>Choose your option</option>
+						<option v-for="l in languages" :value="l.value">{{ l.text }}</option>
+					</select>
+				<p>
+					<label>Search string</label>
+					<input v-model="search" class="w3-input" type="search">
+				</p>
+			</form>
 
-		<div v-if="lang.length == 0" class="w3-panel w3-yellow">
-			<h3>Select language</h3>
-		</div>
+			<div v-if="lang.length > 0" class="w3-container w3-section">
+				<ul id="search-result" class="w3-ul w3-hoverable">
+					<template v-for="r in results">
+						<li class="w3-bar">
+							<div class="w3-bar-item">
+								<span class="w3-large">{{ r.name }} {{ variant(r) }}</span><br>
+								<span>{{ r.id[1] }}</span>
+								<button class="w3-button" @click="copy(r.id[1])">
+									<i class="fa fa-copy"></i>
+								</button>
 
-		
-	</main>
+								<button class="w3-button" @click="itemIds.push(r.id[1])">
+									<i class="fa fa-plus"></i>
+								</button>
+							</div>
+						</li>
+						<li v-if="r.DiyRecipe" class="w3-bar">
+							<div class="w3-bar-item">
+								<span class="w3-large">{{ r.name }} (DIY)</span><br>
+								<span>{{ r.DiyRecipe[1] }}</span>
+								<button class="w3-button" @click="copy(r.id[1])">
+									<i class="fa fa-copy"></i>
+								</button>
+							</div>
+						</li>
+					</template>
+				</ul>
+			</div>
+			<div id="multiple-item-ids" :class="['w3-padding', {'w3-hide': itemIds.length == 0}]">
+				<div
+					:class="['w3-panel', 'w3-round-xlarge', 'w3-card', 'w3-padding-large', 'w3-animate-bottom', 'w3-theme-action']">
+					<div class="w3-bar w3-section">
+						<span class="w3-medium">{{ itemIds.join(" ") }}</span>
+						<button class="w3-button" @click="copy(itemIds.join(' ')); itemIds = [];">
+							<i class="fa fa-copy"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+			<input id="copy-box" v-model="copyText" type="text" ref="copyBox" aria-hidden="true">
+		</main>
+
+		<footer class="w3-container w3-theme-l5">
+			<p>Data source: <a href="https://github.com/imthe666st/ACNH"
+					target="_blank">https://github.com/imthe666st/ACNH</a></p>
+		</footer>
+	</div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/vue@3.2.0-beta.4/dist/vue.global.min.js"></script>
 <script>
@@ -47,9 +147,30 @@
 			return {
 				titles: {
 					default: 'ACNH item id lookup',
-					tw: "動森物品ID 尋找",
+					TWzh: "動森物品ID 尋找",
 				},
 				lang: "",
+				languages: [
+					{ text: "Deutsch", value: "EUde" },
+					{ text: "English" },
+					{ text: "English (UK)", value: "EUen" },
+					{ text: "Español", value: "EUes" },
+					{ text: "Español (US)", value: "USes" },
+					{ text: "Français", value: "EUfr" },
+					{ text: "Français (CA)", value: "USfr" },
+					{ text: "Italiano", value: "EUit" },
+					{ text: "Nederlands", value: "EUnl" },
+					{ text: "Русский", value: "EUru" },
+					{ text: "中文(繁體)", value: "TWzh" },
+					{ text: "中文(簡體)", value: "CNzh" },
+					{ text: "日本語", value: "JPja" },
+					{ text: "한국어", value: "KRko" },
+				],
+				itemData: {},
+				results: [],
+				search: "",
+				copyText: "",
+				itemIds: [],
 			}
 		},
 		computed: {
@@ -59,14 +180,37 @@
 			},
 		},
 		methods: {
-
+			variant(item) {
+				if (item.internal_name && item.internal_name.includes("Fake")) return " (Fake)";
+				else if (item.color) return " (" + item.color + ")";
+				return "";
+			},
+			async copy(text, toast) {
+				this.copyText = text;
+				await this.$nextTick();
+				let copyBox = this.$refs.copyBox;
+				copyBox.select();
+				document.execCommand("copy");
+				// copied
+				copyBox.blur();
+			},
 		},
 		created() {
-			if (navigator.language == "zh-TW") this.lang = "tw";
+			if (navigator.language == "zh-TW") this.lang = "TWzh";
 		},
-		watch:{
-			lang(to){
-				import("./ACNH-master/item_ids/items_TWzh.json").then(j=>console.log(j));
+		watch: {
+			lang(to) {
+				fetch("./ACNH-master/item_ids/items_" + this.lang + ".json")
+					.then(response => response.json())
+					.then(json => this.itemData = json);
+			},
+			search(to) {
+				this.results = [];
+
+				if (to.length > 0)
+					Object.entries(this.itemData).forEach(([key, val]) => {
+						this.results.push(...val.filter(item => item.name.includes(to)));
+					});
 			},
 		},
 	};
