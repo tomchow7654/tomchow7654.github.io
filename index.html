@@ -103,7 +103,7 @@
 									<i class="fa fa-copy"></i>
 								</button>
 
-								<button class="w3-button" @click="itemIds.push(r.id[1])">
+								<button class="w3-button" @click="selected.items.push(r.id[1])">
 									<i class="fa fa-plus"></i>
 								</button>
 							</div>
@@ -112,20 +112,24 @@
 							<div class="w3-bar-item">
 								<span class="w3-large">{{ r.name }} (DIY)</span><br>
 								<span>{{ r.DiyRecipe[1] }}</span>
-								<button class="w3-button" @click="copy(r.id[1])">
+								<button class="w3-button" @click="copy(r.DiyRecipe[1])">
 									<i class="fa fa-copy"></i>
+								</button>
+								
+								<button class="w3-button" @click="selected.diys.push(r.DiyRecipe[1])">
+									<i class="fa fa-plus"></i>
 								</button>
 							</div>
 						</li>
 					</template>
 				</ul>
 			</div>
-			<div id="multiple-item-ids" :class="['w3-padding', {'w3-hide': itemIds.length == 0}]">
+			<div id="multiple-item-ids" :class="['w3-padding', {'w3-hide': selected.items.length == 0}]">
 				<div
 					:class="['w3-panel', 'w3-round-xlarge', 'w3-card', 'w3-padding-large', 'w3-animate-bottom', 'w3-theme-action']">
 					<div class="w3-bar w3-section">
-						<span class="w3-medium">{{ itemIds.join(" ") }}</span>
-						<button class="w3-button" @click="copy(itemIds.join(' ')); itemIds = [];">
+						<span class="w3-medium">{{ selected.items.join(" ") }}</span>
+						<button class="w3-button" @click="copy(selected.items.join(' ')); selected.items = [];">
 							<i class="fa fa-copy"></i>
 						</button>
 					</div>
@@ -170,7 +174,10 @@
 				results: [],
 				search: "",
 				copyText: "",
-				itemIds: [],
+				selected: {
+					items: [],
+					diys: [],
+				},
 			}
 		},
 		computed: {
