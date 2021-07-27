@@ -44,6 +44,7 @@
 		left: 0;
 		bottom: 0;
 		width: 100vw;
+		max-width: 500px;
 	}
 
 	#multiple-item-ids>div {
@@ -79,7 +80,7 @@
 			<h1>{{ title }}</h1>
 		</header>
 		<main>
-			<form class="w3-container w3-section">
+			<form class="w3-container w3-section" @submit.prevent="return false;">
 				<p>
 					<label>Language</label>
 					<select v-model="lang" class="w3-select" name="option">
@@ -93,43 +94,57 @@
 			</form>
 
 			<div v-if="lang.length > 0" class="w3-container w3-section">
-				<ul id="search-result" class="w3-ul w3-hoverable">
+				<ul id="search-result" class="w3-ul w3-row">
 					<template v-for="r in results">
-						<li class="w3-bar">
+						<li class="w3-col s12 m6 l4 w3-bar">
 							<div class="w3-bar-item">
 								<span class="w3-large">{{ r.name }} {{ variant(r) }}</span><br>
 								<span>{{ r.id[1] }}</span>
-								<button class="w3-button" @click="copy(r.id[1])">
-									<i class="fa fa-copy"></i>
-								</button>
-
-								<button class="w3-button" @click="selected.items.push(r.id[1])">
-									<i class="fa fa-plus"></i>
-								</button>
 							</div>
+
+							<button class="w3-bar-item w3-button w3-xlarge w3-right"
+								@click="selected.items.push(r.id[1])">
+								<i class="fa fa-plus"></i>
+							</button>
+
+							<button class="w3-bar-item w3-button w3-xlarge w3-right" @click="copy(r.id[1])">
+								<i class="fa fa-copy"></i>
+							</button>
 						</li>
-						<li v-if="r.DiyRecipe" class="w3-bar">
+						<li v-if="r.DiyRecipe" class="w3-col s12 m6 l4 w3-bar">
 							<div class="w3-bar-item">
 								<span class="w3-large">{{ r.name }} (DIY)</span><br>
 								<span>{{ r.DiyRecipe[1] }}</span>
-								<button class="w3-button" @click="copy(r.DiyRecipe[1])">
-									<i class="fa fa-copy"></i>
-								</button>
-								
-								<button class="w3-button" @click="selected.diys.push(r.DiyRecipe[1])">
-									<i class="fa fa-plus"></i>
-								</button>
 							</div>
+
+							<button class="w3-bar-item w3-button w3-xlarge w3-right" @click="copy(r.DiyRecipe[1])">
+								<i class="fa fa-copy"></i>
+							</button>
+
+							<button class="w3-bar-item w3-button w3-xlarge w3-right"
+								@click="selected.diys.push(r.DiyRecipe[1])">
+								<i class="fa fa-plus"></i>
+							</button>
 						</li>
 					</template>
 				</ul>
 			</div>
-			<div id="multiple-item-ids" :class="['w3-padding', {'w3-hide': selected.items.length == 0}]">
-				<div
-					:class="['w3-panel', 'w3-round-xlarge', 'w3-card', 'w3-padding-large', 'w3-animate-bottom', 'w3-theme-action']">
-					<div class="w3-bar w3-section">
-						<span class="w3-medium">{{ selected.items.join(" ") }}</span>
-						<button class="w3-button" @click="copy(selected.items.join(' ')); selected.items = [];">
+			<div id="multiple-item-ids"
+				:class="['w3-padding', {'w3-hide': selected.items.length == 0 && selected.diys.length == 0}]">
+				<div :class="['w3-panel', 'w3-round-xlarge', 'w3-card', 'w3-padding-large', 'w3-animate-bottom', 
+				'w3-theme-action']">
+					<div v-if="selected.items.length > 0" class="w3-bar w3-section">
+						<span class="w3-medium">Items: {{ selected.items.join(" ") }}</span>
+						<button class="w3-margin-left w3-button"
+							@click="copy(selected.items.join(' ')); selected.items = [];">
+							<i class="fa fa-copy"></i>
+						</button>
+					</div>
+					
+					<div v-if="selected.diys.length > 0" class="w3-bar w3-section">
+						<span class="w3-medium">DIYs: {{ selected.diys.join(" ") }}</span>
+						<button class="w3-margin-left w3-button"
+							@click="copy(selected.diys.join(' ')); selected.diys = [];">
 							<i class="fa fa-copy"></i>
 						</button>
 					</div>
