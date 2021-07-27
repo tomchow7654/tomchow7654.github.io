@@ -177,36 +177,39 @@
 			<div id="multiple-item-ids"
 				:class="['w3-padding', {'w3-hide': selected.items.length == 0 && selected.diys.length == 0}]">
 				<div :class="['w3-panel', 'w3-round-xlarge', 'w3-card', 'w3-padding-large', 'w3-animate-bottom', 
-				'w3-theme-action', 'w3-row']">
-					<div class="w3-section w3-col s10">
+				'w3-theme-action']" style="display: flex;">
+					<div class="w3-section" style="flex-grow: 1;">
 						<template v-if="selected.items.length > 0">
-							<div v-for="index in selected.items.length / selected.splitBy" class="w3-bar">
+							<div v-for="index in Math.ceil(selected.items.length / selected.splitBy)" class="w3-bar">
 								<input v-model="selected.itemPrefix" type="text" class="transparent-textbox"
 									placeholder="Items:" :style="{width: selected.itemPrefix.length + 'rem'}">
 								<span class="w3-medium">{{ splitedItems[index-1].join(" ") }}</span>
-								<button class="w3-margin-left w3-button"
-									@click="copy(selected.itemPrefix + splitedItems[index-1].join(' ')); selected.items = [];">
+								<button class="w3-margin-left w3-button" @click="copy(selected.itemPrefix + splitedItems[index-1].join(' ')); 
+									selected.items.splice(index * selected.splitBy, selected.splitBy);">
 									<i class="fa fa-copy"></i>
 								</button>
 							</div>
 						</template>
 
 						<template v-if="selected.diys.length > 0">
-							<div v-for="index in selected.diys.length / selected.splitBy" class="w3-bar">
+							<div v-for="index in Math.ceil(selected.diys.length / selected.splitBy)" class="w3-bar">
 								<input v-model="selected.diyPrefix" type="text" class="transparent-textbox"
 									placeholder="DIYs:" :style="{width: selected.itemPrefix.length +'rem'}">
 								<span class="w3-medium">{{ splitedDiys[index-1].join(" ") }}</span>
-								<button class="w3-margin-left w3-button"
-									@click="copy(selected.diyPrefix + splitedDiys[index-1].join(' ')); selected.diys = [];">
+								<button class="w3-margin-left w3-button" @click="copy(selected.diyPrefix + splitedDiys[index-1].join(' ')); 
+									selected.diys.splice(index * selected.splitBy, selected.splitBy);">
 									<i class="fa fa-copy"></i>
 								</button>
 							</div>
 						</template>
 					</div>
 
-					<div class="w3-col s2">
-						Split by:
-						<input v-model="selected.splitBy" type="number" class="transparent-textbox" min="1">
+					<div style="flex-shrink: 0;">
+						<div class="w3-bar">
+							Split by:
+							<input v-model="selected.splitBy" type="number" class="transparent-textbox" min="1"
+								style="min-width: 0; width: 20px;">
+						</div>
 					</div>
 				</div>
 			</div>
