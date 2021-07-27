@@ -49,7 +49,7 @@
 
 	#multiple-item-ids>div {
 		margin: 0 auto;
-		max-width: 500px;
+		max-width: 75%;
 	}
 
 	.w3-card {
@@ -184,8 +184,9 @@
 								<input v-model="selected.itemPrefix" type="text" class="transparent-textbox"
 									placeholder="Items:" :style="{width: selected.itemPrefix.length + 'rem'}">
 								<span class="w3-medium">{{ splitedItems[index-1].join(" ") }}</span>
-								<button class="w3-margin-left w3-button" @click="copy(selected.itemPrefix + splitedItems[index-1].join(' ')); 
-									selected.items.splice(index * selected.splitBy, selected.splitBy);">
+								<button class="w3-margin-left w3-button" @click="copy(selected.itemPrefix + ' ' + 
+									splitedItems[index-1].join(' ')); 
+									selected.items.splice( (index - 1) * selected.splitBy, selected.splitBy);">
 									<i class="fa fa-copy"></i>
 								</button>
 							</div>
@@ -196,8 +197,9 @@
 								<input v-model="selected.diyPrefix" type="text" class="transparent-textbox"
 									placeholder="DIYs:" :style="{width: selected.itemPrefix.length +'rem'}">
 								<span class="w3-medium">{{ splitedDiys[index-1].join(" ") }}</span>
-								<button class="w3-margin-left w3-button" @click="copy(selected.diyPrefix + splitedDiys[index-1].join(' ')); 
-									selected.diys.splice(index * selected.splitBy, selected.splitBy);">
+								<button class="w3-margin-left w3-button" @click="copy(selected.diyPrefix +' ' + 
+									splitedDiys[index-1].join(' ')); 
+									selected.diys.splice( (index - 1) * selected.splitBy, selected.splitBy);">
 									<i class="fa fa-copy"></i>
 								</button>
 							</div>
