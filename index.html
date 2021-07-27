@@ -100,6 +100,18 @@
 		color: inherit;
 	}
 
+	/* Chrome, Safari, Edge, Opera */
+	.transparent-textbox::-webkit-outer-spin-button,
+	.transparent-textbox::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	/* Firefox */
+	.transparent-textbox[type=number] {
+		-moz-appearance: textfield;
+	}
+
 	a {
 		text-decoration: none;
 	}
@@ -165,28 +177,34 @@
 			<div id="multiple-item-ids"
 				:class="['w3-padding', {'w3-hide': selected.items.length == 0 && selected.diys.length == 0}]">
 				<div :class="['w3-panel', 'w3-round-xlarge', 'w3-card', 'w3-padding-large', 'w3-animate-bottom', 
-				'w3-theme-action', 'w3-display-container']">
-					<div v-if="selected.items.length > 0" class="w3-bar">
-						<input v-model="selected.itemPrefix" type="text" class="transparent-textbox"
-							placeholder="Items:" :style="{width: (selected.itemPrefix.length * 20) +'px'}">
-						<span class="w3-medium">{{ selected.items.join(" ") }}</span>
-						<button class="w3-margin-left w3-button"
-							@click="copy(selected.itemPrefix + selected.items.join(' ')); selected.items = [];">
-							<i class="fa fa-copy"></i>
-						</button>
+				'w3-theme-action', 'w3-row']">
+					<div class="w3-section w3-col s10">
+						<template v-if="selected.items.length > 0">
+							<div v-for="index in selected.items.length / selected.splitBy" class="w3-bar">
+								<input v-model="selected.itemPrefix" type="text" class="transparent-textbox"
+									placeholder="Items:" :style="{width: selected.itemPrefix.length + 'rem'}">
+								<span class="w3-medium">{{ splitedItems[index-1].join(" ") }}</span>
+								<button class="w3-margin-left w3-button"
+									@click="copy(selected.itemPrefix + splitedItems[index-1].join(' ')); selected.items = [];">
+									<i class="fa fa-copy"></i>
+								</button>
+							</div>
+						</template>
+
+						<template v-if="selected.diys.length > 0">
+							<div v-for="index in selected.diys.length / selected.splitBy" class="w3-bar">
+								<input v-model="selected.diyPrefix" type="text" class="transparent-textbox"
+									placeholder="DIYs:" :style="{width: selected.itemPrefix.length +'rem'}">
+								<span class="w3-medium">{{ splitedDiys[index-1].join(" ") }}</span>
+								<button class="w3-margin-left w3-button"
+									@click="copy(selected.diyPrefix + splitedDiys[index-1].join(' ')); selected.diys = [];">
+									<i class="fa fa-copy"></i>
+								</button>
+							</div>
+						</template>
 					</div>
 
-					<div v-if="selected.diys.length > 0" class="w3-bar">
-						<input v-model="selected.diyPrefix" type="text" class="transparent-textbox" placeholder="DIYs:"
-							:style="{width: (selected.itemPrefix.length * 20) +'px'}">
-						<span class="w3-medium">{{ selected.diys.join(" ") }}</span>
-						<button class="w3-margin-left w3-button"
-							@click="copy(selected.diyPrefix + selected.diys.join(' ')); selected.diys = [];">
-							<i class="fa fa-copy"></i>
-						</button>
-					</div>
-
-					<div class="w3-display-topright">
+					<div class="w3-col s2">
 						Split by:
 						<input v-model="selected.splitBy" type="number" class="transparent-textbox" min="1">
 					</div>
@@ -236,6 +254,7 @@
 					items: [],
 					diyPrefix: "",
 					diys: [],
+					splitBy: 7,
 				},
 			}
 		},
@@ -243,6 +262,18 @@
 			title() {
 				if (this.lang.length == 0) return this.titles.default;
 				return this.titles[this.lang];
+			},
+			splitedItems() {
+				var i, j, splited = [];
+				for (i = 0, j = this.selected.items.length; i < j; i += this.selected.splitBy)
+					splited.push(this.selected.items.slice(i, i + this.selected.splitBy));
+				return splited;
+			},
+			splitedDiys() {
+				var i, j, splited = [];
+				for (i = 0, j = this.selected.diys.length; i < j; i += this.selected.splitBy)
+					splited.push(this.selected.diys.slice(i, i + this.selected.splitBy));
+				return splited;
 			},
 		},
 		methods: {
