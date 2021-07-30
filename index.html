@@ -315,7 +315,7 @@
 		},
 		watch: {
 			lang(to) {
-				fetch("./ACNH-master/item_ids/items_" + this.lang + ".json")
+				fetch("./ACNH/item_ids/items_" + this.lang + ".json")
 					.then(response => response.json())
 					.then(json => this.itemData = json);
 			},
