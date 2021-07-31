@@ -49,7 +49,7 @@
 
 	#multiple-item-ids>div {
 		margin: 0 auto;
-		max-width: 75%;
+		max-width: 600px;
 	}
 
 	.w3-card {
@@ -150,7 +150,8 @@
 			</form>
 
 			<div v-if="lang.length > 0" class="w3-container w3-section">
-				<ul id="search-result" class="w3-ul w3-row">
+				<ul id="search-result" class="w3-ul w3-row" :style="{marginBottom: selected.items.length == 0 && 
+					selected.diys.length == 0 ? 'unset': $refs['floating-box'].scrollHeight }">
 					<template v-for="r in results">
 						<li class="w3-col s12 m6 l4 w3-theme-l5" style="display: flex;">
 							<div style="flex: 0 1 auto;">
@@ -187,7 +188,7 @@
 					</template>
 				</ul>
 			</div>
-			<div id="multiple-item-ids"
+			<div id="multiple-item-ids" ref="floating-box"
 				:class="['w3-padding', {'w3-hide': selected.items.length == 0 && selected.diys.length == 0}]">
 				<div :class="['w3-panel', 'w3-round-xlarge', 'w3-card', 'w3-padding-large', 'w3-animate-bottom', 
 				'w3-theme-action']" style="display: flex;">
