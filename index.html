@@ -151,7 +151,7 @@
 
 			<div v-if="lang.length > 0" class="w3-container w3-section">
 				<ul id="search-result" class="w3-ul w3-row" :style="{marginBottom: selected.items.length == 0 && 
-					selected.diys.length == 0 ? 'unset': $refs['floating-box'].scrollHeight }">
+					selected.diys.length == 0 ? 'unset': $refs['floating-box'].scrollHeight + 'px' }">
 					<template v-for="r in results">
 						<li class="w3-col s12 m6 l4 w3-theme-l5" style="display: flex;">
 							<div style="flex: 0 1 auto;">
@@ -159,14 +159,20 @@
 								<span>{{ r.id[1] }}</span>
 							</div>
 
-							<button class="w3-bar-item w3-button w3-xlarge w3-hover-text-theme" @click="copy(r.id[1])"
+							<button class="w3-button w3-xlarge w3-hover-text-theme" @click="copy(r.id[1])"
 								style="flex: 0 0 auto; margin-left: auto;">
 								<i class="fa fa-copy"></i>
 							</button>
 
-							<button class="w3-bar-item w3-button w3-xlarge w3-hover-theme"
-								@click="selected.items.push(r.id[1])" style="flex: 0 0 auto;">
+							<button class="w3-button w3-xlarge w3-hover-theme" @click="selected.items.push(r.id[1])"
+								style="flex: 0 0 auto;">
 								<i class="fa fa-plus"></i>
+							</button>
+
+							<button v-if="itemVariants.result.includes(r.internal_name)"
+								class="w3-button w3-xlarge w3-hover-theme" @click="itemVariants.open = r"
+								style="flex: 0 0 auto;">
+								<i class="fa fa-paint-brush"></i>
 							</button>
 						</li>
 						<li v-if="r.DiyRecipe" class="w3-col s12 m6 l4 w3-theme-l4" style="display: flex;">
@@ -176,12 +182,12 @@
 							</div>
 
 							<button class="w3-button w3-xlarge w3-hover-text-theme" @click="copy(r.DiyRecipe[1])"
-								style="flex: 0 0 auto;">
+								style="flex: 0 0 auto; margin-left: auto;">
 								<i class="fa fa-copy"></i>
 							</button>
 
 							<button class="w3-button w3-xlarge w3-hover-theme"
-								@click="selected.diys.push(r.DiyRecipe[1])" style="flex: 0 0 auto; margin-left: auto;">
+								@click="selected.diys.push(r.DiyRecipe[1])" style="flex: 0 0 auto;">
 								<i class="fa fa-plus"></i>
 							</button>
 						</li>
@@ -230,11 +236,53 @@
 				</div>
 			</div>
 			<input id="copy-box" v-model="copyText" type="text" ref="copyBox" aria-hidden="true">
+			<!-- The Modal -->
+			<div ref="variant-selector" :class="['w3-modal', {'w3-show': typeof itemVariants.open == 'object'}]">
+				<div v-if="typeof itemVariants.open == 'object'" class="w3-modal-content w3-card-4">
+					<header class="w3-container w3-theme">
+						<span @click="itemVariants.open = ''" class="w3-button w3-display-topright">
+							<i class="fa fa-close"></i></span>
+						<h2>{{ itemVariants.open.name }} <span class="w3-medium">({{ itemVariants.open.id[1] }})</span>
+						</h2>
+					</header>
+					<div class="w3-container">
+						<ul class="w3-ul w3-row" :style="{marginBottom: selected.items.length == 0 && 
+							selected.diys.length == 0 ? 'unset': $refs['floating-box'].scrollHeight + 'px' }">
+							<li v-for="v in itemVariants.data.filter(x => x.id == itemVariants.open.internal_name)"
+								class="w3-col s12 m6 l4 w3-theme-l5" style="display: flex;">
+								<div style="flex: 0 1 auto;">
+									<span class="w3-large text-truncate-2">{{ v.locale[lang] }}</span><br>
+									<span>{{ itemVariantId(itemVariants.open.id[1],
+										v.variant_id.slice(v.variant_id.lastIndexOf("_") + 1 )) }}</span>
+								</div>
+
+								<button class="w3-button w3-xlarge w3-hover-text-theme" @click="copy(itemVariantId(
+									itemVariants.open.id[1], v.variant_id.slice(v.variant_id.lastIndexOf('_') + 1 )))
+									itemVariants.open = '';" style="flex: 0 0 auto; margin-left: auto;">
+									<i class="fa fa-copy"></i>
+								</button>
+
+								<button class="w3-button w3-xlarge w3-hover-theme" @click="selected.items.push(itemVariantId(
+									itemVariants.open.id[1], v.variant_id.slice(v.variant_id.lastIndexOf('_') + 1 )));
+									itemVariants.open = '';" style="flex: 0 0 auto;">
+									<i class="fa fa-plus"></i>
+								</button>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
 		</main>
 
 		<footer class="w3-container w3-theme-l5">
-			<p>Data source: <a href="https://github.com/imthe666st/ACNH"
-					target="_blank">https://github.com/imthe666st/ACNH</a></p>
+			<p>Data source: </p>
+			<ul class="">
+				<li><a href="https://github.com/imthe666st/ACNH" target="_blank">imthe666st / ACNH</a>
+				</li>
+				<li><a href="https://github.com/alexislours/translation-sheet-data" target="_blank">alexislours /
+						translation-sheet-data</a>
+				</li>
+			</ul>
 		</footer>
 	</div>
 </body>
@@ -265,6 +313,11 @@
 					{ text: "한국어", value: "KRko" },
 				],
 				itemData: {},
+				itemVariants: {
+					open: "",
+					data: [],
+					result: [],
+				},
 				results: [],
 				search: "",
 				copyText: "",
@@ -273,7 +326,7 @@
 					items: [],
 					diyPrefix: "",
 					diys: [],
-					splitBy: 7,
+					splitBy: 5,
 				},
 			}
 		},
@@ -310,9 +363,22 @@
 				// copied
 				copyBox.blur();
 			},
+			itemVariantId(itemId, variantId) {
+				if (variantId == 0) return itemId;
+				else return "0000" + variantId.toString(16).toUpperCase().padStart(4, "0") + "0000" + itemId;
+			},
 		},
 		created() {
 			if (navigator.language == "zh-TW") this.lang = "TWzh";
+			fetch("./translation-sheet-data/variants.json")
+				.then(response => response.json())
+				.then(json => this.itemVariants.data = json);
+
+			window.onclick = event => {
+				if (event.target == this.$refs['variant-selector']) {
+					this.itemVariants.open = "";
+				}
+			}
 		},
 		watch: {
 			lang(to) {
@@ -323,10 +389,20 @@
 			search(to) {
 				this.results = [];
 
-				if (to.length > 0)
+				if (to.length > 0) {
 					Object.entries(this.itemData).forEach(([key, val]) => {
 						this.results.push(...val.filter(item => item.name.toLowerCase().includes(to.toLowerCase())));
 					});
+					let internal_names = this.results.reduce((arr, r) => {
+						if (r.internal_name) arr.push(r.internal_name);
+						return arr;
+					}, []);
+
+					this.itemVariants.result = this.itemVariants.data.reduce((arr, v) => {
+						if (internal_names.includes(v.id)) arr.push(v.id);
+						return arr;
+					}, []);
+				}
 			},
 		},
 	};
