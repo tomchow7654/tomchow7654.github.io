@@ -237,7 +237,7 @@
               </div>
             </div>
             <div v-if="r.DiyRecipe" class="col">
-              <div class="card border-secondary mb-3" style="max-width: 18rem;">
+              <div class="card border-secondary mb-3">
                 <div class="card-body">
                   <h5 class="card-title text-truncate-2">{{ r.name }} (DIY)</h5>
                   <p class="card-text">{{ pref.diySeparateCmd ? r.DiyRecipe[1] : diyToDropCmd(r.DiyRecipe[1]) }}</p>
@@ -311,8 +311,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
   integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/vue@3.2.0-beta.4/dist/vue.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@3.2.0-beta.8/dist/vue.global.min.js"></script>
 <script src="script.js"></script>
 
 </html>
