@@ -1,412 +1,286 @@
-<!DOCTYPE html>
-<html>
-<title>ACNH item id lookup (Multi-language)</title>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-purple.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-	@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500&display=swap');
+<!doctype html>
+<html lang="en">
 
-	#app {
-		height: 100vh;
-		margin: 0;
-		display: flex;
-		flex-direction: column;
-		transition: all .4s;
-	}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <title>ACNH item id lookup (Multi-language)</title>
 
-	footer {
-		margin-top: auto;
-	}
 
-	body,
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		font-family: 'Noto Sans TC', sans-serif;
-	}
 
-	#copy-box {
-		position: absolute;
-		z-index: -1;
-		top: -50px;
-		opacity: 0;
-		pointer-events: none;
-	}
+  <!-- Bootstrap core CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 
-	#multiple-item-ids {
-		z-index: 5;
-		position: fixed;
-		left: 0;
-		bottom: 0;
-		width: 100vw;
-	}
+  <style>
+    .bd-placeholder-img {
+      font-size: 1.125rem;
+      text-anchor: middle;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+    }
 
-	#multiple-item-ids>div {
-		margin: 0 auto;
-		max-width: 600px;
-	}
+    #copy-box {
+      position: absolute;
+      z-index: -1;
+      top: -50px;
+      opacity: 0;
+      pointer-events: none;
+    }
 
-	.w3-card {
-		transition: all .4s;
-	}
+    @media (min-width: 768px) {
+      .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+      }
+    }
+  </style>
 
-	.cover {
-		height: 200px;
-		font-size: 2.5rem;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		padding: 16px;
-	}
 
-	.cover>* {
-		max-height: 100%;
-		max-width: 100%;
-	}
+  <!-- Custom styles for this template -->
+  <link href="style.css" rel="stylesheet">
+</head>
 
-	.text-truncate {
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
+<body id="app">
 
-	.text-truncate-2 {
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		-webkit-box-orient: vertical;
-		overflow-y: hidden;
-	}
+  <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+    <span class="navbar-brand col-md-3 col-lg-2 me-0 px-3">{{ title }}</span>
+    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse"
+      data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </header>
 
-	.transparent-textbox {
-		background: transparent;
-		border: 0;
-		border-bottom-color: currentcolor;
-		border-bottom-style: none;
-		border-bottom-width: 0px;
-		border-bottom: solid 2px white;
-		margin: 0px 4px;
-		min-width: 40px;
-		max-width: 30%;
-		color: inherit;
-	}
+  <div class="container-fluid">
+    <div class="row">
+      <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse overflow-auto">
+        <div class="position-sticky">
+          <span class="d-flex align-items-center p-3 mb-3 border-bottom">
+            <span class="fs-5 fw-semibold">Menu</span>
+          </span>
 
-	.transparent-textbox:not(:focus)::placeholder {
-		/* Chrome, Firefox, Opera, Safari 10.1+ */
-		color: inherit;
-		opacity: 1;
-		/* Firefox */
-	}
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+            <span>Selected</span>
+            <a class="link-secondary" href="#" aria-label="Clear" @click="selected.items = []; selected.diys = [];">
+              <i class="bi-x" aria-hidden="true"></i>
+            </a>
+          </h6>
 
-	.transparent-textbox:not(:focus):-ms-input-placeholder {
-		/* Internet Explorer 10-11 */
-		color: inherit;
-	}
+          <ul class="list-group list-group-flush border-bottom">
+            <li v-for="index in Math.ceil(selected.items.length / selected.splitBy)" style="background: inherit;"
+              class="list-group-item">
+              <div class="d-flex justify-content-between align-items-start">
+                <input v-model="selected.itemPrefix" type="text" style="max-width: 100%;"
+                  class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
+                <button class="ms-2 btn" @click="copy(selected.itemPrefix + ' ' + splitedItems[index - 1].join(' ')); 
+                  selected.items.splice((index - 1) * selected.splitBy, selected.splitBy);">
+                  <i class="bi-clipboard ms-2"></i>
+                </button>
+              </div>
+              <span class="mx-1">{{ splitedItems[index-1].join(" ") }}</span>
+            </li>
 
-	.transparent-textbox:not(:focus)::-ms-input-placeholder {
-		/* Microsoft Edge */
-		color: inherit;
-	}
+            <li v-for="index in Math.ceil(selected.diys.length / selected.splitBy)" style="background: inherit;"
+              class="list-group-item">
+              <div class="d-flex justify-content-between align-items-start">
+                <input v-model="selected.diyPrefix" type="text" style="max-width: 100%;"
+                  class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
+                <button class="ms-2 btn" @click="copy(selected.diyPrefix + ' ' + splitedDiys[index - 1].join(' ')); 
+                  selected.diys.splice((index - 1) * selected.splitBy, selected.splitBy);">
+                  <i class="bi-clipboard ms-2"></i>
+                </button>
+              </div>
+              <span class="mx-1">{{ splitedDiys[index-1].join(" ") }}</span>
+            </li>
+          </ul>
 
-	/* Chrome, Safari, Edge, Opera */
-	.transparent-textbox::-webkit-outer-spin-button,
-	.transparent-textbox::-webkit-inner-spin-button {
-		-webkit-appearance: none;
-		margin: 0;
-	}
+          <h6
+            class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted d-none">
+            <span>History</span>
+            <a class="link-secondary" href="#" aria-label="Add a new report">
+              <i class="bi-x" aria-hidden="true"></i>
+            </a>
+          </h6>
+          <ul class="nav flex-column mb-2 d-none">
+            <li class="nav-item">
+              <a class="nav-link" href="#">
+                <i class="bi-file-text" aria-hidden="true"></i>
+                Current month
+              </a>
+            </li>
+          </ul>
 
-	/* Firefox */
-	.transparent-textbox[type=number] {
-		-moz-appearance: textfield;
-	}
+          <h6
+            class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+            <span>Preferences</span>
+          </h6>
 
-	a {
-		text-decoration: none;
-	}
-</style>
+          <ul class="nav flex-column mb-2">
+            <li class="nav-item mx-3 my-2 form-check form-switch">
+              <input v-model="pref.showToast" class="form-check-input" type="checkbox" id="show-toast"
+                checked="pref.showToast">
+              <label class="form-check-label" for="show-toast">Show Toast</label>
+            </li>
 
-<body>
-	<div id="app">
-		<header class="w3-container w3-theme-l4 w3-card">
-			<h1>{{ title }}</h1>
-		</header>
-		<main>
-			<form class="w3-container w3-section" @submit.prevent="return false;">
-				<p>
-					<label>Language</label>
-					<select v-model="lang" class="w3-select" name="option">
-						<option value="" disabled selected>Choose your option</option>
-						<option v-for="l in languages" :value="l.value">{{ l.text }}</option>
-					</select>
-				<p>
-					<label>Search string</label>
-					<input v-model="search" class="w3-input" type="search">
-				</p>
-			</form>
+            <li class="nav-item mx-3 my-2">
+              <label class="form-label" for="split-by">Split By</label>
+              <input v-model="selected.splitBy" class="form-control form-control-sm" type="number" id="split-by">
+            </li>
+          </ul>
+        </div>
+      </nav>
 
-			<div v-if="lang.length > 0" class="w3-container w3-section">
-				<ul id="search-result" class="w3-ul w3-row" :style="{marginBottom: selected.items.length == 0 && 
-					selected.diys.length == 0 ? 'unset': $refs['floating-box'].scrollHeight + 'px' }">
-					<template v-for="r in results">
-						<li class="w3-col s12 m6 l4 w3-theme-l5" style="display: flex;">
-							<div style="flex: 0 1 auto;">
-								<span class="w3-large text-truncate-2">{{ r.name }} {{ variant(r) }}</span><br>
-								<span>{{ r.id[1] }}</span>
-							</div>
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div
+          class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">{{ title }}</h1>
+        </div>
 
-							<button class="w3-button w3-xlarge w3-hover-text-theme" @click="copy(r.id[1])"
-								style="flex: 0 0 auto; margin-left: auto;">
-								<i class="fa fa-copy"></i>
-							</button>
+        <form @submit.prevent="return false;">
+          <div class="input-group mb-3">
+            <label class="input-group-text" for="languageSelector"><i class="bi-globe"></i></label>
+            <select v-model="pref.language.selected" class="form-select" name="languageSelector">
+              <option value="" disabled selected>Choose...</option>
+              <option v-for="l in pref.language.options" :value="l.value">{{ l.text }}</option>
+            </select>
+          </div>
 
-							<button class="w3-button w3-xlarge w3-hover-theme" @click="selected.items.push(r.id[1])"
-								style="flex: 0 0 auto;">
-								<i class="fa fa-plus"></i>
-							</button>
+          <div class="input-group mb-3">
+            <label class="input-group-text"><i class="bi-search"></i></label>
+            <input v-model="search" type="text" class="form-control" placeholder="Search" aria-label="search"
+              aria-describedby="search">
+          </div>
+        </form>
 
-							<button v-if="itemVariants.result.includes(r.internal_name)"
-								class="w3-button w3-xlarge w3-hover-theme" @click="itemVariants.open = r"
-								style="flex: 0 0 auto;">
-								<i class="fa fa-paint-brush"></i>
-							</button>
-						</li>
-						<li v-if="r.DiyRecipe" class="w3-col s12 m6 l4 w3-theme-l4" style="display: flex;">
-							<div style="flex: 0 1 auto;">
-								<span class="w3-large text-truncate-2">{{ r.name }} (DIY)</span><br>
-								<span>{{ r.DiyRecipe[1] }}</span>
-							</div>
+        <div v-if="pref.language.selected.length > 0" class="container">
+          <div id="search-result" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
+            <template v-for="r in results">
+              <div class="col">
+                <div class="card border-primary mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title text-truncate-2">{{ r.name }} {{ variant(r) }}</h5>
+                    <p class="card-text">{{ r.id[1] }}</p>
+                    <div class="btn-group btn-group-lg" role="group" aria-label="action button group">
+                      <button type="button" :class="['btn', copyText == r.id[1] ? 'btn-success': 'btn-primary']"
+                        @click="copy(r.id[1])">
+                        <i :class="[copyText == r.id[1] ? 'bi-check' : 'bi-clipboard']" aria-hidden="true"></i>
+                      </button>
+                      <button type="button" class="btn btn-primary" @click="selected.items.push(r.id[1])">
+                        <i class="bi-plus" aria-hidden="true"></i>
+                      </button>
 
-							<button class="w3-button w3-xlarge w3-hover-text-theme" @click="copy(r.DiyRecipe[1])"
-								style="flex: 0 0 auto; margin-left: auto;">
-								<i class="fa fa-copy"></i>
-							</button>
+                      <div v-if="itemVariants.result.includes(r.internal_name)" class="btn-group" role="group">
+                        <button type="button" class="btn btn-primary dropdown-toggle" @click="itemVariants.open = r"
+                          data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                          <i class="bi-palette" aria-hidden="true"></i>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="variant selector button group">
+                          <li v-for="v in openedVariant" class="dropdown-item-text d-flex" aria-current="true">
+                            <div class="flex-grow-1">
+                              <h5 class="mb-1">{{ v.locale[pref.language.selected] }}</h5>
+                              <p class="mb-1">{{ v.variant_id_calculated }}
+                              </p>
+                            </div>
+                            <div class="btn-group btn-group-lg ms-2" role="group"
+                              aria-label="variant selector button group">
+                              <button type="button"
+                                :class="['btn', copyText == v.variant_id_calculated ? 'btn-success': 'btn-outline-info']"
+                                @click="copy(v.variant_id_calculated)">
+                                <i :class="[copyText == v.variant_id_calculated ? 'bi-check' : 'bi-clipboard']"
+                                  aria-hidden="true"></i>
+                              </button>
+                              <button type="button" class="btn btn-outline-info"
+                                @click="selected.items.push(itemVariantId(v.variant_id_calculated))">
+                                <i class="bi-plus" aria-hidden="true"></i>
+                              </button>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-if="r.DiyRecipe" class="col">
+                <div class="card border-secondary mb-3" style="max-width: 18rem;">
+                  <div class="card-body">
+                    <h5 class="card-title text-truncate-2">{{ r.name }} (DIY)</h5>
+                    <p class="card-text">{{ pref.diySeparateCmd ? r.DiyRecipe[1] : diyToDropCmd(r.DiyRecipe[1]) }}</p>
+                    <div class="btn-group btn-group-lg" role="group" aria-label="action button group">
+                      <button type="button" :class="['btn', [r.DiyRecipe[1], diyToDropCmd(r.DiyRecipe[1])].includes(copyText) ? 
+                      'btn-success': 'btn-secondary']"
+                        @click="copy(pref.diySeparateCmd ? r.DiyRecipe[1] : diyToDropCmd(r.DiyRecipe[1]))">
+                        <i :class="[[r.DiyRecipe[1], diyToDropCmd(r.DiyRecipe[1])].includes(copyText) ? 'bi-check' : 
+                        'bi-clipboard']" aria-hidden="true"></i>
+                      </button>
+                      <button type="button" class="btn btn-secondary" @click="pref.diySeparateCmd ? selected.diys.push(
+                        r.DiyRecipe[1]) : selected.items.push(diyToDropCmd(r.DiyRecipe[1]))">
+                        <i class="bi-plus" aria-hidden="true"></i>
+                      </button>
+                      <button type="button" class="btn btn-secondary"
+                        @click="pref.diySeparateCmd = !pref.diySeparateCmd">
+                        {{ pref.diySeparateCmd ? (selected.diyPrefix.length == 0 ? "DIY" : selected.diyPrefix)
+                        : (selected.itemPrefix.length == 0 ? "Item" : selected.itemPrefix) }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <input id="copy-box" v-model="copyText" type="text" ref="copyBox" aria-hidden="true">
+  <div aria-live="polite" aria-atomic="true" class="position-relative">
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
+      <template v-if="selected.items.length > 0">
+        <div v-for="index in Math.ceil(selected.items.length / selected.splitBy)" class="toast align-items-center"
+          role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body d-flex">
+              <input v-model="selected.itemPrefix" type="text" class="form-control form-control-sm transparent-textbox"
+                placeholder="Items:" :style="{width: selected.itemPrefix.length + 'rem'}">
+              <span class="">{{ splitedItems[index-1].join(" ") }}</span>
+            </div>
+            <button type="button" class="btn me-2 m-auto" aria-label="Copy"
+              @click="copy(selected.itemPrefix + ' ' + 
+            splitedItems[index - 1].join(' ')); selected.items.splice((index - 1) * selected.splitBy, selected.splitBy);">
+              <i class="bi-clipboard"></i>
+            </button>
+            <button type="button" class="btn-close mx-2 my-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      </template>
 
-							<button class="w3-button w3-xlarge w3-hover-theme"
-								@click="selected.diys.push(r.DiyRecipe[1])" style="flex: 0 0 auto;">
-								<i class="fa fa-plus"></i>
-							</button>
-						</li>
-					</template>
-				</ul>
-			</div>
-			<div id="multiple-item-ids" ref="floating-box"
-				:class="['w3-padding', {'w3-hide': selected.items.length == 0 && selected.diys.length == 0}]">
-				<div :class="['w3-panel', 'w3-round-xlarge', 'w3-card', 'w3-padding-large', 'w3-animate-bottom', 
-				'w3-theme-action']" style="display: flex;">
-					<div class="w3-section" style="flex-grow: 1;">
-						<template v-if="selected.items.length > 0">
-							<div v-for="index in Math.ceil(selected.items.length / selected.splitBy)" class="w3-bar">
-								<input v-model="selected.itemPrefix" type="text" class="transparent-textbox"
-									placeholder="Items:" :style="{width: selected.itemPrefix.length + 'rem'}">
-								<span class="w3-medium">{{ splitedItems[index-1].join(" ") }}</span>
-								<button class="w3-margin-left w3-button" @click="copy(selected.itemPrefix + ' ' + 
-									splitedItems[index-1].join(' ')); 
-									selected.items.splice( (index - 1) * selected.splitBy, selected.splitBy);">
-									<i class="fa fa-copy"></i>
-								</button>
-							</div>
-						</template>
-
-						<template v-if="selected.diys.length > 0">
-							<div v-for="index in Math.ceil(selected.diys.length / selected.splitBy)" class="w3-bar">
-								<input v-model="selected.diyPrefix" type="text" class="transparent-textbox"
-									placeholder="DIYs:" :style="{width: selected.itemPrefix.length +'rem'}">
-								<span class="w3-medium">{{ splitedDiys[index-1].join(" ") }}</span>
-								<button class="w3-margin-left w3-button" @click="copy(selected.diyPrefix +' ' + 
-									splitedDiys[index-1].join(' ')); 
-									selected.diys.splice( (index - 1) * selected.splitBy, selected.splitBy);">
-									<i class="fa fa-copy"></i>
-								</button>
-							</div>
-						</template>
-					</div>
-
-					<div style="flex-shrink: 0;">
-						<div class="w3-bar">
-							Split by:
-							<input v-model="selected.splitBy" type="number" class="transparent-textbox" min="1"
-								style="min-width: 0; width: 20px;">
-						</div>
-					</div>
-				</div>
-			</div>
-			<input id="copy-box" v-model="copyText" type="text" ref="copyBox" aria-hidden="true">
-			<!-- The Modal -->
-			<div ref="variant-selector" :class="['w3-modal', {'w3-show': typeof itemVariants.open == 'object'}]">
-				<div v-if="typeof itemVariants.open == 'object'" class="w3-modal-content w3-card-4">
-					<header class="w3-container w3-theme">
-						<span @click="itemVariants.open = ''" class="w3-button w3-display-topright">
-							<i class="fa fa-close"></i></span>
-						<h2>{{ itemVariants.open.name }} <span class="w3-medium">({{ itemVariants.open.id[1] }})</span>
-						</h2>
-					</header>
-					<div class="w3-container">
-						<ul class="w3-ul w3-row" :style="{marginBottom: selected.items.length == 0 && 
-							selected.diys.length == 0 ? 'unset': $refs['floating-box'].scrollHeight + 'px' }">
-							<li v-for="v in itemVariants.data.filter(x => x.id == itemVariants.open.internal_name)"
-								class="w3-col s12 m6 l4 w3-theme-l5" style="display: flex;">
-								<div style="flex: 0 1 auto;">
-									<span class="w3-large text-truncate-2">{{ v.locale[lang] }}</span><br>
-									<span>{{ itemVariantId(itemVariants.open.id[1],
-										v.variant_id.slice(v.variant_id.lastIndexOf("_") + 1 )) }}</span>
-								</div>
-
-								<button class="w3-button w3-xlarge w3-hover-text-theme" @click="copy(itemVariantId(
-									itemVariants.open.id[1], v.variant_id.slice(v.variant_id.lastIndexOf('_') + 1 )))
-									itemVariants.open = '';" style="flex: 0 0 auto; margin-left: auto;">
-									<i class="fa fa-copy"></i>
-								</button>
-
-								<button class="w3-button w3-xlarge w3-hover-theme" @click="selected.items.push(itemVariantId(
-									itemVariants.open.id[1], v.variant_id.slice(v.variant_id.lastIndexOf('_') + 1 )));
-									itemVariants.open = '';" style="flex: 0 0 auto;">
-									<i class="fa fa-plus"></i>
-								</button>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</main>
-
-		<footer class="w3-container w3-theme-l5">
-			<p>Data source: </p>
-			<ul class="">
-				<li><a href="https://github.com/imthe666st/ACNH" target="_blank">imthe666st / ACNH</a>
-				</li>
-				<li><a href="https://github.com/alexislours/translation-sheet-data" target="_blank">alexislours /
-						translation-sheet-data</a>
-				</li>
-			</ul>
-		</footer>
-	</div>
+      <template v-if="selected.diys.length > 0">
+        <div v-for="index in Math.ceil(selected.diys.length / selected.splitBy)" class="toast align-items-center"
+          role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body d-flex">
+              <input v-model="selected.diyPrefix" type="text" class="form-control form-control-sm transparent-textbox"
+                placeholder="DIYs:" :style="{width: selected.itemPrefix.length + 'rem'}">
+              <span class="">{{ splitedDiys[index-1].join(" ") }}</span>
+            </div>
+            <button type="button" class="btn me-2 m-auto" aria-label="Copy" @click="copy(selected.diyPrefix + ' ' + 
+            splitedDiys[index-1].join(' ')); selected.diys.splice( (index - 1) * selected.splitBy, selected.splitBy);">
+              <i class="bi-clipboard"></i>
+            </button>
+            <button type="button" class="btn-close mx-2 my-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
 </body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/vue@3.2.0-beta.4/dist/vue.global.min.js"></script>
-<script>
-	let app = {
-		data() {
-			return {
-				titles: {
-					default: 'ACNH item id lookup',
-					TWzh: "動森物品ID 尋找",
-				},
-				lang: "",
-				languages: [
-					{ text: "Deutsch", value: "EUde" },
-					{ text: "English", value: "USen" },
-					{ text: "English (UK)", value: "EUen" },
-					{ text: "Español", value: "EUes" },
-					{ text: "Español (US)", value: "USes" },
-					{ text: "Français", value: "EUfr" },
-					{ text: "Français (CA)", value: "USfr" },
-					{ text: "Italiano", value: "EUit" },
-					{ text: "Nederlands", value: "EUnl" },
-					{ text: "Русский", value: "EUru" },
-					{ text: "中文(繁體)", value: "TWzh" },
-					{ text: "中文(簡體)", value: "CNzh" },
-					{ text: "日本語", value: "JPja" },
-					{ text: "한국어", value: "KRko" },
-				],
-				itemData: {},
-				itemVariants: {
-					open: "",
-					data: [],
-					result: [],
-				},
-				results: [],
-				search: "",
-				copyText: "",
-				selected: {
-					itemPrefix: "",
-					items: [],
-					diyPrefix: "",
-					diys: [],
-					splitBy: 5,
-				},
-			}
-		},
-		computed: {
-			title() {
-				if (this.lang.length == 0) return this.titles.default;
-				return this.titles[this.lang];
-			},
-			splitedItems() {
-				var i, j, splited = [];
-				for (i = 0, j = this.selected.items.length; i < j; i += this.selected.splitBy)
-					splited.push(this.selected.items.slice(i, i + this.selected.splitBy));
-				return splited;
-			},
-			splitedDiys() {
-				var i, j, splited = [];
-				for (i = 0, j = this.selected.diys.length; i < j; i += this.selected.splitBy)
-					splited.push(this.selected.diys.slice(i, i + this.selected.splitBy));
-				return splited;
-			},
-		},
-		methods: {
-			variant(item) {
-				if (item.internal_name && item.internal_name.includes("Fake")) return " (Fake)";
-				else if (item.color) return " (" + item.color + ")";
-				return "";
-			},
-			async copy(text, toast) {
-				this.copyText = text;
-				await this.$nextTick();
-				let copyBox = this.$refs.copyBox;
-				copyBox.select();
-				document.execCommand("copy");
-				// copied
-				copyBox.blur();
-			},
-			itemVariantId(itemId, variantId) {
-				if (variantId == 0) return itemId;
-				else return "0000" + variantId.toString(16).toUpperCase().padStart(4, "0") + "0000" + itemId;
-			},
-		},
-		created() {
-			if (navigator.language == "zh-TW") this.lang = "TWzh";
-			fetch("./translation-sheet-data/variants.json")
-				.then(response => response.json())
-				.then(json => this.itemVariants.data = json);
-
-			window.onclick = event => {
-				if (event.target == this.$refs['variant-selector']) {
-					this.itemVariants.open = "";
-				}
-			}
-		},
-		watch: {
-			lang(to) {
-				fetch("./ACNH/item_ids/items_" + this.lang + ".json")
-					.then(response => response.json())
-					.then(json => this.itemData = json);
-			},
-			search(to) {
-				this.results = [];
-
-				if (to.length > 0) {
-					Object.entries(this.itemData).forEach(([key, val]) => {
-						this.results.push(...val.filter(item => item.name.toLowerCase().includes(to.toLowerCase())));
-					});
-					let internal_names = this.results.reduce((arr, r) => {
-						if (r.internal_name) arr.push(r.internal_name);
-						return arr;
-					}, []);
-
-					this.itemVariants.result = this.itemVariants.data.reduce((arr, v) => {
-						if (internal_names.includes(v.id)) arr.push(v.id);
-						return arr;
-					}, []);
-				}
-			},
-		},
-	};
-	Vue.createApp(app).mount('#app');
-</script>
+<script src="script.js"></script>
 
 </html>

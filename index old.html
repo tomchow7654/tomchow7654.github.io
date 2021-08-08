@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+<title>ACNH item id lookup (Multi-language)</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-purple.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+	@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500&display=swap');
+
+	#app {
+		height: 100vh;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		transition: all .4s;
+	}
+
+	footer {
+		margin-top: auto;
+	}
+
+	body,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-family: 'Noto Sans TC', sans-serif;
+	}
+
+	#copy-box {
+		position: absolute;
+		z-index: -1;
+		top: -50px;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	#multiple-item-ids {
+		z-index: 5;
+		position: fixed;
+		left: 0;
+		bottom: 0;
+		width: 100vw;
+	}
+
+	#multiple-item-ids>div {
+		margin: 0 auto;
+		max-width: 600px;
+	}
+
+	.w3-card {
+		transition: all .4s;
+	}
+
+	.cover {
+		height: 200px;
+		font-size: 2.5rem;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 16px;
+	}
+
+	.cover>* {
+		max-height: 100%;
+		max-width: 100%;
+	}
+
+	.text-truncate {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.text-truncate-2 {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow-y: hidden;
+	}
+
+	.transparent-textbox {
+		background: transparent;
+		border: 0;
+		border-bottom-color: currentcolor;
+		border-bottom-style: none;
+		border-bottom-width: 0px;
+		border-bottom: solid 2px white;
+		margin: 0px 4px;
+		min-width: 40px;
+		max-width: 30%;
+		color: inherit;
+	}
+
+	.transparent-textbox:not(:focus)::placeholder {
+		/* Chrome, Firefox, Opera, Safari 10.1+ */
+		color: inherit;
+		opacity: 1;
+		/* Firefox */
+	}
+
+	.transparent-textbox:not(:focus):-ms-input-placeholder {
+		/* Internet Explorer 10-11 */
+		color: inherit;
+	}
+
+	.transparent-textbox:not(:focus)::-ms-input-placeholder {
+		/* Microsoft Edge */
+		color: inherit;
+	}
+
+	/* Chrome, Safari, Edge, Opera */
+	.transparent-textbox::-webkit-outer-spin-button,
+	.transparent-textbox::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	/* Firefox */
+	.transparent-textbox[type=number] {
+		-moz-appearance: textfield;
+	}
+
+	a {
+		text-decoration: none;
+	}
+</style>
+
+<body>
+	<div id="app">
+		<header class="w3-container w3-theme-l4 w3-card">
+			<h1>{{ title }}</h1>
+		</header>
+		<main>
+			<form class="w3-container w3-section" @submit.prevent="return false;">
+				<p>
+					<label>Language</label>
+					<select v-model="lang" class="w3-select" name="option">
+						<option value="" disabled selected>Choose your option</option>
+						<option v-for="l in languages" :value="l.value">{{ l.text }}</option>
+					</select>
+				<p>
+					<label>Search string</label>
+					<input v-model="search" class="w3-input" type="search">
+				</p>
+			</form>
+
+			<div v-if="lang.length > 0" class="w3-container w3-section">
+				<ul id="search-result" class="w3-ul w3-row" :style="{marginBottom: selected.items.length == 0 && 
+					selected.diys.length == 0 ? 'unset': $refs['floating-box'].scrollHeight + 'px' }">
+					<template v-for="r in results">
+						<li class="w3-col s12 m6 l4 w3-theme-l5" style="display: flex;">
+							<div style="flex: 0 1 auto;">
+								<span class="w3-large text-truncate-2">{{ r.name }} {{ variant(r) }}</span><br>
+								<span>{{ r.id[1] }}</span>
+							</div>
+
+							<button class="w3-button w3-xlarge w3-hover-text-theme" @click="copy(r.id[1])"
+								style="flex: 0 0 auto; margin-left: auto;">
+								<i class="fa fa-copy"></i>
+							</button>
+
+							<button class="w3-button w3-xlarge w3-hover-theme" @click="selected.items.push(r.id[1])"
+								style="flex: 0 0 auto;">
+								<i class="fa fa-plus"></i>
+							</button>
+
+							<button v-if="itemVariants.result.includes(r.internal_name)"
+								class="w3-button w3-xlarge w3-hover-theme" @click="itemVariants.open = r"
+								style="flex: 0 0 auto;">
+								<i class="fa fa-paint-brush"></i>
+							</button>
+						</li>
+						<li v-if="r.DiyRecipe" class="w3-col s12 m6 l4 w3-theme-l4" style="display: flex;">
+							<div style="flex: 0 1 auto;">
+								<span class="w3-large text-truncate-2">{{ r.name }} (DIY)</span><br>
+								<span>{{ r.DiyRecipe[1] }}</span>
+							</div>
+
+							<button class="w3-button w3-xlarge w3-hover-text-theme" @click="copy(r.DiyRecipe[1])"
+								style="flex: 0 0 auto; margin-left: auto;">
+								<i class="fa fa-copy"></i>
+							</button>
+
+							<button class="w3-button w3-xlarge w3-hover-theme"
+								@click="selected.diys.push(r.DiyRecipe[1])" style="flex: 0 0 auto;">
+								<i class="fa fa-plus"></i>
+							</button>
+						</li>
+					</template>
+				</ul>
+			</div>
+			<div id="multiple-item-ids" ref="floating-box"
+				:class="['w3-padding', {'w3-hide': selected.items.length == 0 && selected.diys.length == 0}]">
+				<div :class="['w3-panel', 'w3-round-xlarge', 'w3-card', 'w3-padding-large', 'w3-animate-bottom', 
+				'w3-theme-action']" style="display: flex;">
+					<div class="w3-section" style="flex-grow: 1;">
+						<template v-if="selected.items.length > 0">
+							<div v-for="index in Math.ceil(selected.items.length / selected.splitBy)" class="w3-bar">
+								<input v-model="selected.itemPrefix" type="text" class="transparent-textbox"
+									placeholder="Items:" :style="{width: selected.itemPrefix.length + 'rem'}">
+								<span class="w3-medium">{{ splitedItems[index-1].join(" ") }}</span>
+								<button class="w3-margin-left w3-button" @click="copy(selected.itemPrefix + ' ' + 
+									splitedItems[index-1].join(' ')); 
+									selected.items.splice( (index - 1) * selected.splitBy, selected.splitBy);">
+									<i class="fa fa-copy"></i>
+								</button>
+							</div>
+						</template>
+
+						<template v-if="selected.diys.length > 0">
+							<div v-for="index in Math.ceil(selected.diys.length / selected.splitBy)" class="w3-bar">
+								<input v-model="selected.diyPrefix" type="text" class="transparent-textbox"
+									placeholder="DIYs:" :style="{width: selected.itemPrefix.length +'rem'}">
+								<span class="w3-medium">{{ splitedDiys[index-1].join(" ") }}</span>
+								<button class="w3-margin-left w3-button" @click="copy(selected.diyPrefix +' ' + 
+									splitedDiys[index-1].join(' ')); 
+									selected.diys.splice( (index - 1) * selected.splitBy, selected.splitBy);">
+									<i class="fa fa-copy"></i>
+								</button>
+							</div>
+						</template>
+					</div>
+
+					<div style="flex-shrink: 0;">
+						<div class="w3-bar">
+							Split by:
+							<input v-model="selected.splitBy" type="number" class="transparent-textbox" min="1"
+								style="min-width: 0; width: 20px;">
+						</div>
+					</div>
+				</div>
+			</div>
+			<input id="copy-box" v-model="copyText" type="text" ref="copyBox" aria-hidden="true">
+			<!-- The Modal -->
+			<div ref="variant-selector" :class="['w3-modal', {'w3-show': typeof itemVariants.open == 'object'}]">
+				<div v-if="typeof itemVariants.open == 'object'" class="w3-modal-content w3-card-4">
+					<header class="w3-container w3-theme">
+						<span @click="itemVariants.open = ''" class="w3-button w3-display-topright">
+							<i class="fa fa-close"></i></span>
+						<h2>{{ itemVariants.open.name }} <span class="w3-medium">({{ itemVariants.open.id[1] }})</span>
+						</h2>
+					</header>
+					<div class="w3-container">
+						<ul class="w3-ul w3-row" :style="{marginBottom: selected.items.length == 0 && 
+							selected.diys.length == 0 ? 'unset': $refs['floating-box'].scrollHeight + 'px' }">
+							<li v-for="v in itemVariants.data.filter(x => x.id == itemVariants.open.internal_name)"
+								class="w3-col s12 m6 l4 w3-theme-l5" style="display: flex;">
+								<div style="flex: 0 1 auto;">
+									<span class="w3-large text-truncate-2">{{ v.locale[lang] }}</span><br>
+									<span>{{ itemVariantId(itemVariants.open.id[1],
+										v.variant_id.slice(v.variant_id.lastIndexOf("_") + 1 )) }}</span>
+								</div>
+
+								<button class="w3-button w3-xlarge w3-hover-text-theme" @click="copy(itemVariantId(
+									itemVariants.open.id[1], v.variant_id.slice(v.variant_id.lastIndexOf('_') + 1 )))
+									itemVariants.open = '';" style="flex: 0 0 auto; margin-left: auto;">
+									<i class="fa fa-copy"></i>
+								</button>
+
+								<button class="w3-button w3-xlarge w3-hover-theme" @click="selected.items.push(itemVariantId(
+									itemVariants.open.id[1], v.variant_id.slice(v.variant_id.lastIndexOf('_') + 1 )));
+									itemVariants.open = '';" style="flex: 0 0 auto;">
+									<i class="fa fa-plus"></i>
+								</button>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</main>
+
+		<footer class="w3-container w3-theme-l5">
+			<p>Data source: </p>
+			<ul class="">
+				<li>
+					<!-- <i class="bi-github" role="img" aria-label="GitHub"></i> -->
+					<a class="w3-text-blue" href="https://github.com/imthe666st/" target="_blank">imthe666st</a> /
+					<a class="w3-text-blue" href="https://github.com/imthe666st/ACNH">ACNH</a>
+				</li>
+				<li>
+					<!-- <i class="bi-github" role="img" aria-label="GitHub"></i> -->
+					<a class="w3-text-blue" href="https://github.com/alexislours/translation-sheet-data"
+						target="_blank">
+						alexislours</a> /
+					<a class="w3-text-blue" href="https://github.com/alexislours/translation-sheet-data"
+						target="_blank">translation-sheet-data</a>
+				</li>
+			</ul>
+		</footer>
+	</div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue@3.2.0-beta.4/dist/vue.global.min.js"></script>
+<script>
+	let app = {
+		data() {
+			return {
+				titles: {
+					default: 'ACNH item id lookup',
+					TWzh: "動森物品ID 尋找",
+				},
+				lang: "",
+				languages: [
+					{ text: "Deutsch", value: "EUde" },
+					{ text: "English", value: "USen" },
+					{ text: "English (UK)", value: "EUen" },
+					{ text: "Español", value: "EUes" },
+					{ text: "Español (US)", value: "USes" },
+					{ text: "Français", value: "EUfr" },
+					{ text: "Français (CA)", value: "USfr" },
+					{ text: "Italiano", value: "EUit" },
+					{ text: "Nederlands", value: "EUnl" },
+					{ text: "Русский", value: "EUru" },
+					{ text: "中文(繁體)", value: "TWzh" },
+					{ text: "中文(簡體)", value: "CNzh" },
+					{ text: "日本語", value: "JPja" },
+					{ text: "한국어", value: "KRko" },
+				],
+				itemData: {},
+				itemVariants: {
+					open: "",
+					data: [],
+					result: [],
+				},
+				results: [],
+				search: "",
+				copyText: "",
+				selected: {
+					itemPrefix: "",
+					items: [],
+					diyPrefix: "",
+					diys: [],
+					splitBy: 5,
+				},
+			}
+		},
+		computed: {
+			title() {
+				if (this.lang.length == 0) return this.titles.default;
+				return this.titles[this.lang];
+			},
+			splitedItems() {
+				var i, j, splited = [];
+				for (i = 0, j = this.selected.items.length; i < j; i += this.selected.splitBy)
+					splited.push(this.selected.items.slice(i, i + this.selected.splitBy));
+				return splited;
+			},
+			splitedDiys() {
+				var i, j, splited = [];
+				for (i = 0, j = this.selected.diys.length; i < j; i += this.selected.splitBy)
+					splited.push(this.selected.diys.slice(i, i + this.selected.splitBy));
+				return splited;
+			},
+		},
+		methods: {
+			variant(item) {
+				if (item.internal_name && item.internal_name.includes("Fake")) return " (Fake)";
+				else if (item.color) return " (" + item.color + ")";
+				return "";
+			},
+			async copy(text, toast) {
+				this.copyText = text;
+				await this.$nextTick();
+				let copyBox = this.$refs.copyBox;
+				copyBox.select();
+				document.execCommand("copy");
+				// copied
+				copyBox.blur();
+			},
+			itemVariantId(itemId, variantId) {
+				if (variantId == 0) return itemId;
+				else return "0000" + variantId.toString(16).toUpperCase().padStart(4, "0") + "0000" + itemId;
+			},
+		},
+		created() {
+			if (navigator.language == "zh-TW") this.lang = "TWzh";
+			fetch("./translation-sheet-data/variants.json")
+				.then(response => response.json())
+				.then(json => this.itemVariants.data = json);
+
+			window.onclick = event => {
+				if (event.target == this.$refs['variant-selector']) {
+					this.itemVariants.open = "";
+				}
+			}
+		},
+		watch: {
+			lang(to) {
+				fetch("./ACNH/item_ids/items_" + this.lang + ".json")
+					.then(response => response.json())
+					.then(json => this.itemData = json);
+			},
+			search(to) {
+				this.results = [];
+
+				if (to.length > 0) {
+					Object.entries(this.itemData).forEach(([key, val]) => {
+						this.results.push(...val.filter(item => item.name.toLowerCase().includes(to.toLowerCase())));
+					});
+					let internal_names = this.results.reduce((arr, r) => {
+						if (r.internal_name) arr.push(r.internal_name);
+						return arr;
+					}, []);
+
+					this.itemVariants.result = this.itemVariants.data.reduce((arr, v) => {
+						if (internal_names.includes(v.id)) arr.push(v.id);
+						return arr;
+					}, []);
+				}
+			},
+		},
+	};
+	Vue.createApp(app).mount('#app');
+</script>
+
+</html>
