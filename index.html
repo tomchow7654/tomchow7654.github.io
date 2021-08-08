@@ -56,183 +56,215 @@
   <div class="container-fluid">
     <div class="row">
       <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse overflow-auto">
-        <div class="position-sticky">
-          <span class="d-flex align-items-center p-3 mb-3 border-bottom">
+        <div class="position-sticky d-flex flex-column h-100">
+          <div class="p-3 mb-3 border-bottom">
             <span class="fs-5 fw-semibold">Menu</span>
-          </span>
+          </div>
 
-          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-            <span>Selected</span>
-            <a class="link-secondary" href="#" aria-label="Clear" @click="selected.items = []; selected.diys = [];">
-              <i class="bi-x" aria-hidden="true"></i>
-            </a>
-          </h6>
-
-          <ul class="list-group list-group-flush border-bottom">
-            <li v-for="index in Math.ceil(selected.items.length / selected.splitBy)" style="background: inherit;"
-              class="list-group-item">
-              <div class="d-flex justify-content-between align-items-start">
-                <input v-model="selected.itemPrefix" type="text" style="max-width: 100%;"
-                  class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
-                <button class="ms-2 btn" @click="copy(selected.itemPrefix + ' ' + splitedItems[index - 1].join(' ')); 
-                  selected.items.splice((index - 1) * selected.splitBy, selected.splitBy);">
-                  <i class="bi-clipboard ms-2"></i>
-                </button>
-              </div>
-              <span class="mx-1">{{ splitedItems[index-1].join(" ") }}</span>
-            </li>
-
-            <li v-for="index in Math.ceil(selected.diys.length / selected.splitBy)" style="background: inherit;"
-              class="list-group-item">
-              <div class="d-flex justify-content-between align-items-start">
-                <input v-model="selected.diyPrefix" type="text" style="max-width: 100%;"
-                  class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
-                <button class="ms-2 btn" @click="copy(selected.diyPrefix + ' ' + splitedDiys[index - 1].join(' ')); 
-                  selected.diys.splice((index - 1) * selected.splitBy, selected.splitBy);">
-                  <i class="bi-clipboard ms-2"></i>
-                </button>
-              </div>
-              <span class="mx-1">{{ splitedDiys[index-1].join(" ") }}</span>
-            </li>
-          </ul>
-
-          <h6
-            class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted d-none">
-            <span>History</span>
-            <a class="link-secondary" href="#" aria-label="Add a new report">
-              <i class="bi-x" aria-hidden="true"></i>
-            </a>
-          </h6>
-          <ul class="nav flex-column mb-2 d-none">
-            <li class="nav-item">
-              <a class="nav-link" href="#">
-                <i class="bi-file-text" aria-hidden="true"></i>
-                Current month
+          <div class="px-3 mb-3 border-bottom">
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
+              <span>Selected</span>
+              <a class="link-secondary" href="#" aria-label="Clear" @click="selected.items = []; selected.diys = [];">
+                <i class="bi-x" aria-hidden="true"></i>
               </a>
-            </li>
-          </ul>
+            </h6>
 
-          <h6
-            class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-            <span>Preferences</span>
-          </h6>
-
-          <ul class="nav flex-column mb-2">
-            <li class="nav-item mx-3 my-2 form-check form-switch">
-              <input v-model="pref.showToast" class="form-check-input" type="checkbox" id="show-toast"
-                checked="pref.showToast">
-              <label class="form-check-label" for="show-toast">Show Toast</label>
-            </li>
-
-            <li class="nav-item mx-3 my-2">
-              <label class="form-label" for="split-by">Split By</label>
-              <input v-model="selected.splitBy" class="form-control form-control-sm" type="number" id="split-by">
-            </li>
-          </ul>
-        </div>
-      </nav>
-
-      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-        <div
-          class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <h1 class="h2">{{ title }}</h1>
-        </div>
-
-        <form @submit.prevent="return false;">
-          <div class="input-group mb-3">
-            <label class="input-group-text" for="languageSelector"><i class="bi-globe"></i></label>
-            <select v-model="pref.language.selected" class="form-select" name="languageSelector">
-              <option value="" disabled selected>Choose...</option>
-              <option v-for="l in pref.language.options" :value="l.value">{{ l.text }}</option>
-            </select>
-          </div>
-
-          <div class="input-group mb-3">
-            <label class="input-group-text"><i class="bi-search"></i></label>
-            <input v-model="search" type="text" class="form-control" placeholder="Search" aria-label="search"
-              aria-describedby="search">
-          </div>
-        </form>
-
-        <div v-if="pref.language.selected.length > 0" class="container">
-          <div id="search-result" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
-            <template v-for="r in results">
-              <div class="col">
-                <div class="card border-primary mb-3">
-                  <div class="card-body">
-                    <h5 class="card-title text-truncate-2">{{ r.name }} {{ variant(r) }}</h5>
-                    <p class="card-text">{{ r.id[1] }}</p>
-                    <div class="btn-group btn-group-lg" role="group" aria-label="action button group">
-                      <button type="button" :class="['btn', copyText == r.id[1] ? 'btn-success': 'btn-primary']"
-                        @click="copy(r.id[1])">
-                        <i :class="[copyText == r.id[1] ? 'bi-check' : 'bi-clipboard']" aria-hidden="true"></i>
-                      </button>
-                      <button type="button" class="btn btn-primary" @click="selected.items.push(r.id[1])">
-                        <i class="bi-plus" aria-hidden="true"></i>
-                      </button>
-
-                      <div v-if="itemVariants.result.includes(r.internal_name)" class="btn-group" role="group">
-                        <button type="button" class="btn btn-primary dropdown-toggle" @click="itemVariants.open = r"
-                          data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                          <i class="bi-palette" aria-hidden="true"></i>
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="variant selector button group">
-                          <li v-for="v in openedVariant" class="dropdown-item-text d-flex" aria-current="true">
-                            <div class="flex-grow-1">
-                              <h5 class="mb-1">{{ v.locale[pref.language.selected] }}</h5>
-                              <p class="mb-1">{{ v.variant_id_calculated }}
-                              </p>
-                            </div>
-                            <div class="btn-group btn-group-lg ms-2" role="group"
-                              aria-label="variant selector button group">
-                              <button type="button"
-                                :class="['btn', copyText == v.variant_id_calculated ? 'btn-success': 'btn-outline-info']"
-                                @click="copy(v.variant_id_calculated)">
-                                <i :class="[copyText == v.variant_id_calculated ? 'bi-check' : 'bi-clipboard']"
-                                  aria-hidden="true"></i>
-                              </button>
-                              <button type="button" class="btn btn-outline-info"
-                                @click="selected.items.push(itemVariantId(v.variant_id_calculated))">
-                                <i class="bi-plus" aria-hidden="true"></i>
-                              </button>
-                            </div>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
+            <ul class="list-group list-group-flush">
+              <li v-for="index in Math.ceil(selected.items.length / selected.splitBy)" style="background: inherit;"
+                class="list-group-item px-0">
+                <div class="d-flex justify-content-between align-items-start">
+                  <input v-model="selected.itemPrefix" type="text" style="max-width: 100%;"
+                    class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
+                  <button class="ms-2 btn" @click="copy(selected.itemPrefix + ' ' + splitedItems[index - 1].join(' ')); 
+                  selected.items.splice((index - 1) * selected.splitBy, selected.splitBy);">
+                    <i class="bi-clipboard ms-2"></i>
+                  </button>
                 </div>
-              </div>
-              <div v-if="r.DiyRecipe" class="col">
-                <div class="card border-secondary mb-3" style="max-width: 18rem;">
-                  <div class="card-body">
-                    <h5 class="card-title text-truncate-2">{{ r.name }} (DIY)</h5>
-                    <p class="card-text">{{ pref.diySeparateCmd ? r.DiyRecipe[1] : diyToDropCmd(r.DiyRecipe[1]) }}</p>
-                    <div class="btn-group btn-group-lg" role="group" aria-label="action button group">
-                      <button type="button" :class="['btn', [r.DiyRecipe[1], diyToDropCmd(r.DiyRecipe[1])].includes(copyText) ? 
-                      'btn-success': 'btn-secondary']"
-                        @click="copy(pref.diySeparateCmd ? r.DiyRecipe[1] : diyToDropCmd(r.DiyRecipe[1]))">
-                        <i :class="[[r.DiyRecipe[1], diyToDropCmd(r.DiyRecipe[1])].includes(copyText) ? 'bi-check' : 
-                        'bi-clipboard']" aria-hidden="true"></i>
-                      </button>
-                      <button type="button" class="btn btn-secondary" @click="pref.diySeparateCmd ? selected.diys.push(
-                        r.DiyRecipe[1]) : selected.items.push(diyToDropCmd(r.DiyRecipe[1]))">
-                        <i class="bi-plus" aria-hidden="true"></i>
-                      </button>
-                      <button type="button" class="btn btn-secondary"
-                        @click="pref.diySeparateCmd = !pref.diySeparateCmd">
-                        {{ pref.diySeparateCmd ? (selected.diyPrefix.length == 0 ? "DIY" : selected.diyPrefix)
-                        : (selected.itemPrefix.length == 0 ? "Item" : selected.itemPrefix) }}
-                      </button>
-                    </div>
-                  </div>
+                <span class="mx-1">{{ splitedItems[index-1].join(" ") }}</span>
+              </li>
+
+              <li v-for="index in Math.ceil(selected.diys.length / selected.splitBy)" style="background: inherit;"
+                class="list-group-item px-0">
+                <div class="d-flex justify-content-between align-items-start">
+                  <input v-model="selected.diyPrefix" type="text" style="max-width: 100%;"
+                    class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
+                  <button class="ms-2 btn" @click="copy(selected.diyPrefix + ' ' + splitedDiys[index - 1].join(' ')); 
+                  selected.diys.splice((index - 1) * selected.splitBy, selected.splitBy);">
+                    <i class="bi-clipboard ms-2"></i>
+                  </button>
                 </div>
-              </div>
-            </template>
+                <span class="mx-1">{{ splitedDiys[index-1].join(" ") }}</span>
+              </li>
+            </ul>
           </div>
+
+          <div class="px-3 mb-3 border-bottom d-none">
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
+              <span>History</span>
+              <a class="link-secondary" href="#" aria-label="Add a new report">
+                <i class="bi-x" aria-hidden="true"></i>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item px-0">
+                <a class="nav-link" href="#">
+                  <i class="bi-file-text" aria-hidden="true"></i>
+                  Current month
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="px-3 mb-3 border-bottom">
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
+              <span>Preferences</span>
+            </h6>
+
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item my-2 form-check form-switch">
+                <input v-model="pref.showToast" class="form-check-input" type="checkbox" id="show-toast"
+                  checked="pref.showToast">
+                <label class="form-check-label" for="show-toast">Show Toast</label>
+              </li>
+
+              <li class="nav-item my-2">
+                <label class="form-label" for="split-by">Split By</label>
+                <input v-model="selected.splitBy" class="form-control form-control-sm" type="number" id="split-by">
+              </li>
+            </ul>
+          </div>
+
+          <footer class="footer mt-auto px-3">
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
+              <span>Data Source</span>
+            </h6>
+
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <i class="bi-github"></i>
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="https://github.com/imthe666st/" target="_blank">imthe666st</a>
+                  </li>
+                  <li class="breadcrumb-item"><a href="https://github.com/imthe666st/ACNH" target="_blank">ACNH</a>
+                  </li>
+                </ol>
+              </li>
+              <li class="nav-item">
+                <i class="bi-github"></i>
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="https://github.com/alexislours/" target="_blank">alexislours</a>
+                  </li>
+                  <li class="breadcrumb-item"><a href="https://github.com/alexislours/translation-sheet-data"
+                      target="_blank">translation-sheet-data</a>
+                  </li>
+                </ol>
+              </li>
+            </ul>
         </div>
-      </main>
+        </footer>
     </div>
+    </nav>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{ title }}</h1>
+      </div>
+
+      <form @submit.prevent="return false;">
+        <div class="input-group mb-3">
+          <label class="input-group-text" for="languageSelector"><i class="bi-globe"></i></label>
+          <select v-model="pref.language.selected" class="form-select" name="languageSelector">
+            <option value="" disabled selected>Choose...</option>
+            <option v-for="l in pref.language.options" :value="l.value">{{ l.text }}</option>
+          </select>
+        </div>
+
+        <div class="input-group mb-3">
+          <label class="input-group-text"><i class="bi-search"></i></label>
+          <input v-model="search" type="text" class="form-control" placeholder="Search" aria-label="search"
+            aria-describedby="search">
+        </div>
+      </form>
+
+      <div v-if="pref.language.selected.length > 0" class="container">
+        <div id="search-result" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
+          <template v-for="r in results">
+            <div class="col">
+              <div class="card border-primary mb-3">
+                <div class="card-body">
+                  <h5 class="card-title text-truncate-2">{{ r.name }} {{ variant(r) }}</h5>
+                  <p class="card-text">{{ r.id[1] }}</p>
+                  <div class="btn-group btn-group-lg" role="group" aria-label="action button group">
+                    <button type="button" :class="['btn', copyText == r.id[1] ? 'btn-success': 'btn-primary']"
+                      @click="copy(r.id[1])">
+                      <i :class="[copyText == r.id[1] ? 'bi-check' : 'bi-clipboard']" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-primary" @click="selected.items.push(r.id[1])">
+                      <i class="bi-plus" aria-hidden="true"></i>
+                    </button>
+
+                    <div v-if="itemVariants.result.includes(r.internal_name)" class="btn-group" role="group">
+                      <button type="button" class="btn btn-primary dropdown-toggle" @click="itemVariants.open = r"
+                        data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                        <i class="bi-palette" aria-hidden="true"></i>
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="variant selector button group">
+                        <li v-for="v in openedVariant" class="dropdown-item-text d-flex" aria-current="true">
+                          <div class="flex-grow-1">
+                            <h5 class="mb-1">{{ v.locale[pref.language.selected] }}</h5>
+                            <p class="mb-1">{{ v.variant_id_calculated }}
+                            </p>
+                          </div>
+                          <div class="btn-group btn-group-lg ms-2" role="group"
+                            aria-label="variant selector button group">
+                            <button type="button"
+                              :class="['btn', copyText == v.variant_id_calculated ? 'btn-success': 'btn-outline-info']"
+                              @click="copy(v.variant_id_calculated)">
+                              <i :class="[copyText == v.variant_id_calculated ? 'bi-check' : 'bi-clipboard']"
+                                aria-hidden="true"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-info"
+                              @click="selected.items.push(itemVariantId(v.variant_id_calculated))">
+                              <i class="bi-plus" aria-hidden="true"></i>
+                            </button>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-if="r.DiyRecipe" class="col">
+              <div class="card border-secondary mb-3" style="max-width: 18rem;">
+                <div class="card-body">
+                  <h5 class="card-title text-truncate-2">{{ r.name }} (DIY)</h5>
+                  <p class="card-text">{{ pref.diySeparateCmd ? r.DiyRecipe[1] : diyToDropCmd(r.DiyRecipe[1]) }}</p>
+                  <div class="btn-group btn-group-lg" role="group" aria-label="action button group">
+                    <button type="button" :class="['btn', [r.DiyRecipe[1], diyToDropCmd(r.DiyRecipe[1])].includes(copyText) ? 
+                      'btn-success': 'btn-secondary']"
+                      @click="copy(pref.diySeparateCmd ? r.DiyRecipe[1] : diyToDropCmd(r.DiyRecipe[1]))">
+                      <i :class="[[r.DiyRecipe[1], diyToDropCmd(r.DiyRecipe[1])].includes(copyText) ? 'bi-check' : 
+                        'bi-clipboard']" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-secondary" @click="pref.diySeparateCmd ? selected.diys.push(
+                        r.DiyRecipe[1]) : selected.items.push(diyToDropCmd(r.DiyRecipe[1]))">
+                      <i class="bi-plus" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-secondary" @click="pref.diySeparateCmd = !pref.diySeparateCmd">
+                      {{ pref.diySeparateCmd ? (selected.diyPrefix.length == 0 ? "DIY" : selected.diyPrefix)
+                      : (selected.itemPrefix.length == 0 ? "Item" : selected.itemPrefix) }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </main>
+  </div>
   </div>
   <input id="copy-box" v-model="copyText" type="text" ref="copyBox" aria-hidden="true">
   <div aria-live="polite" aria-atomic="true" class="position-relative">
