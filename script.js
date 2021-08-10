@@ -115,7 +115,7 @@
       showAllToast() {
         if (this.pref.showToast)
           this.$nextTick().then(r => {
-            let toastElList = [].slice.call(document.querySelectorAll('.toast'))
+            let toastElList = [].slice.call(document.querySelectorAll('.toast'));
             this.toastList = toastElList.map(function (toastEl) {
               return new bootstrap.Toast(toastEl, { autohide: false });
             });
@@ -185,6 +185,21 @@
         if (to.length > 0) {
           setTimeout(() => { if (this.copyText == to) this.copyText = "" }, 3000);
         }
+      },
+      "pref.showToast"(to) {
+        this.$nextTick().then(r => {
+          let toastElList = [].slice.call(document.querySelectorAll('.toast'));
+          this.toastList = toastElList.map(function (toastEl) {
+            return new bootstrap.Toast(toastEl, { autohide: false });
+          });
+
+          this.toastList.forEach(t => {
+            if (to)
+              t.show();
+            else
+              t.hide();
+          });
+        });
       },
       "selected.items.length"(to) {
         this.showAllToast();
