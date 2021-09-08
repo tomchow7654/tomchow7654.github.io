@@ -1,0 +1,134 @@
+[
+    {
+        "internal_name": "Axe_12615",
+        "durability": 3
+    },
+    {
+        "internal_name": "Axe_03068",
+        "durability": 40
+    },
+    {
+        "internal_name": "Axe_02100",
+        "durability": 100
+    },
+    {
+        "internal_name": "Axe_05856",
+        "durability": 100
+    },
+    {
+        "internal_name": "Axe_09617",
+        "durability": 200
+    },
+    {
+        "internal_name": "Shovel_03082",
+        "durability": 40
+    },
+    {
+        "internal_name": "Shovel_02099",
+        "durability": 100
+    },
+    {
+        "internal_name": "Shovel_08575",
+        "durability": 100
+    },
+    {
+        "internal_name": "Shovel_08576",
+        "durability": 100
+    },
+    {
+        "internal_name": "Shovel_08577",
+        "durability": 100
+    },
+    {
+        "internal_name": "Shovel_08574",
+        "durability": 200
+    },
+    {
+        "internal_name": "FishingRod_03084",
+        "durability": 10
+    },
+    {
+        "internal_name": "FishingRod_02377",
+        "durability": 30
+    },
+    {
+        "internal_name": "FishingRod_08471",
+        "durability": 30
+    },
+    {
+        "internal_name": "FishingRod_08472",
+        "durability": 30
+    },
+    {
+        "internal_name": "FishingRod_08473",
+        "durability": 30
+    },
+    {
+        "internal_name": "FishingRod_08660",
+        "durability": 90
+    },
+    {
+        "internal_name": "Net_02376",
+        "durability": 10
+    },
+    {
+        "internal_name": "Net_05784",
+        "durability": 30
+    },
+    {
+        "internal_name": "Net_08176",
+        "durability": 30
+    },
+    {
+        "internal_name": "Net_08177",
+        "durability": 30
+    },
+    {
+        "internal_name": "Net_08178",
+        "durability": 30
+    },
+    {
+        "internal_name": "Net_08179",
+        "durability": 90
+    },
+    {
+        "internal_name": "Watering_03083",
+        "durability": 20
+    },
+    {
+        "internal_name": "Watering_02379",
+        "durability": 60
+    },
+    {
+        "internal_name": "Watering_08534",
+        "durability": 60
+    },
+    {
+        "internal_name": "Watering_08535",
+        "durability": 60
+    },
+    {
+        "internal_name": "Watering_08536",
+        "durability": 60
+    },
+    {
+        "internal_name": "Watering_08533",
+        "durability": 180
+    },
+    {
+        "internal_name": "Slingshot_02822",
+        "durability": 20
+    },
+    {
+        "internal_name": "Slingshot_08579",
+        "durability": 20
+    },
+    {
+        "internal_name": "Slingshot_08580",
+        "durability": 20
+    },
+    {
+        "internal_name": "Slingshot_08578",
+        "durability": 60
+    }
+]

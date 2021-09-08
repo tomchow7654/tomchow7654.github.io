@@ -1,0 +1,104 @@
+[
+    {
+        "color": "yellow",
+        "internal_name": "WrappingPaper_07683",
+        "hex": "0100",
+        "withName": "4100"
+    },
+    {
+        "color": "pink",
+        "internal_name": "WrappingPaper_07684",
+        "hex": "500",
+        "withName": "4500"
+    },
+    {
+        "color": "orange",
+        "internal_name": "WrappingPaper_07685",
+        "hex": "900",
+        "withName": "4900"
+    },
+    {
+        "color": "light green",
+        "internal_name": "WrappingPaper_07686",
+        "hex": "D00",
+        "withName": "4D00"
+    },
+    {
+        "color": "green",
+        "internal_name": "WrappingPaper_07687",
+        "hex": "1100",
+        "withName": "5100"
+    },
+    {
+        "color": "mint",
+        "internal_name": "WrappingPaper_07688",
+        "hex": "1500",
+        "withName": "5500"
+    },
+    {
+        "color": "light blue",
+        "internal_name": "WrappingPaper_07689",
+        "hex": "1900",
+        "withName": "5900"
+    },
+    {
+        "color": "purple",
+        "internal_name": "WrappingPaper_07690",
+        "hex": "1D00",
+        "withName": "5D00"
+    },
+    {
+        "color": "navy",
+        "internal_name": "WrappingPaper_07691",
+        "hex": "2100",
+        "withName": "6100"
+    },
+    {
+        "color": "blue",
+        "internal_name": "WrappingPaper_07692",
+        "hex": "2500",
+        "withName": "6500"
+    },
+    {
+        "color": "white",
+        "internal_name": "WrappingPaper_07693",
+        "hex": "2900",
+        "withName": "6900"
+    },
+    {
+        "color": "red",
+        "internal_name": "WrappingPaper_07694",
+        "hex": "2D00",
+        "withName": "6D00"
+    },
+    {
+        "color": "gold",
+        "internal_name": "WrappingPaper_07695",
+        "hex": "3100",
+        "withName": "7100"
+    },
+    {
+        "color": "brown",
+        "internal_name": "WrappingPaper_07696",
+        "hex": "3500",
+        "withName": "7500"
+    },
+    {
+        "color": "gray",
+        "internal_name": "WrappingPaper_07697",
+        "hex": "3900",
+        "withName": "7900"
+    },
+    {
+        "color": "black",
+        "internal_name": "WrappingPaper_07698",
+        "hex": "3D00",
+        "withName": "7D00"
+    },
+    {
+        "color": "festive",
+        "internal_name": "WrappingPaper_13792",
+        "hex": "3F00",
+        "withName": "7F00"
+    }
+]
