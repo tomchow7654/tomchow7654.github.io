@@ -10,8 +10,8 @@
 
 
   <!-- Bootstrap core CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 
   <style>
@@ -172,30 +172,61 @@
       </div>
 
       <form @submit.prevent="return false;">
-        <div class="input-group mb-3">
-          <label class="input-group-text" for="languageSelector"><i class="bi-globe"></i></label>
-          <select v-model="pref.language.selected" class="form-select" name="languageSelector">
-            <option value="" disabled selected>Choose...</option>
-            <option v-for="l in pref.language.options" :value="l.value">{{ l.text }}</option>
-          </select>
-        </div>
+        <fieldset class="row row-cols-lg-auto g-3 align-items-center mb-3">
+          <div class="col-12">
+            <label class="visually-hidden" for="languageSelector">Language</label>
+            <div class="input-group">
+              <label class="input-group-text" for="languageSelector"><i class="bi-globe"></i></label>
+              <select v-model="pref.language.selected" class="form-select" name="languageSelector">
+                <option value="" disabled selected>Choose...</option>
+                <option v-for="l in pref.language.options" :value="l.value">{{ l.text }}</option>
+              </select>
+            </div>
+          </div>
 
-        <div class="input-group mb-3">
-          <label class="input-group-text"><i class="bi-search"></i></label>
-          <input v-model="search.text" type="text" class="form-control" placeholder="Search" aria-label="search"
-            aria-describedby="search">
-          <button class="btn btn-outline-info d-none" type="button" @click="search.openMenu = !search.openMenu"
-            :aria-pressed="search.oepnMenu">
-            <i class="bi bi-three-dots-vertical"></i>
-          </button>
-        </div>
+          <div class="col-12 flex-grow-1">
+            <label class="visually-hidden">Search</label>
+            <div class="input-group">
+              <label class="input-group-text"><i class="bi-search"></i></label>
+              <input v-model="search.text" type="text" class="form-control" placeholder="Search" aria-label="search"
+                aria-describedby="search">
+              <button class="btn btn-outline-info" type="button" data-bs-toggle="collapse"
+                data-bs-target="#default-item-settings" aria-expanded="false" aria-controls="default-item-settings">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset id="default-item-settings" class="collapse row row-cols-lg-auto g-3 align-items-center mb-3">
+          <div class="col-12">
+            <label class="visually-hidden text-capitalize">Default wrapping paper</label>
+            <div class="input-group">
+              <label class="input-group-text" for="select-default-wrapping-paper"><i class="bi-gift"></i></label>
+              <select v-model="pref.wrappingPaper.color" id="select-default-wrapping-paper"
+                class="form-select text-capitalize" aria-label="Select wrapping paper">
+                <option selected value="">None</option>
+                <option v-for="option in itemData.wrappingPaper" :value="option.color">
+                  {{ getWrappingPaperName(option) }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="col-12" v-if="pref.wrappingPaper.color.length > 0">
+            <div class="form-check">
+              <input v-model="pref.wrappingPaper.withName" class="form-check-input" type="checkbox"
+                id="default-wrapping-paper-with-name">
+              <label class="form-check-label" for="default-wrapping-paper-with-name">
+                With Name
+              </label>
+            </div>
+          </div>
+        </fieldset>
       </form>
 
       <div v-if="pref.language.selected.length > 0" class="container">
         <div v-if="search.text.length > 0 && search.moreThan100" class="alert alert-warning" role="alert">
           Only showing the first 100 results.
         </div>
-        <div v-if="search.openMenu"></div>
         <div id="search-result" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
           <template v-for="r in search.results">
             <div class="col">
@@ -247,18 +278,18 @@
                             <img v-if="r.wrappingPaper.color.length > 0" :src="getBagPicture(r)" class="icon" />
                           </label>
                           <select v-model="r.wrappingPaper.color" :id="r.internal_name + '-select-wrapping-paper'"
-                            class="form-select captialize" aria-label="Select wrapping paper">
+                            class="form-select text-capitalize" aria-label="Select wrapping paper">
                             <option selected value="">None</option>
                             <option v-for="option in itemData.wrappingPaper" :value="option.color">
-                              {{ option.color.replace(/\w\S*/g, txt=> txt.charAt(0).toUpperCase() +
-                              txt.substr(1).toLowerCase())}}
+                              {{ itemData.translated.STR_ItemName_80_Etc.find(i=> i.internal_name ==
+                              option.internal_name).name }}
                             </option>
                           </select>
                         </li>
 
                         <li v-if="r.wrappingPaper.color.length > 0" class="dropdown-item-text mb-3">
                           <div class="form-check">
-                            <input v-model="r.wrappingPaper.withName" class="form-check-input" type="checkbox" value=""
+                            <input v-model="r.wrappingPaper.withName" class="form-check-input" type="checkbox"
                               :id="r.internal_name + '-wrapping-paper-with-name'">
                             <label class="form-check-label" :for="r.internal_name + '-wrapping-paper-with-name'">
                               With Name
@@ -281,7 +312,8 @@
                           <li v-for="v in r.variants" class="dropdown-item-text d-flex" aria-current="true">
                             <div class="flex-grow-1">
                               <h5 class="mb-1">{{ v.locale[pref.language.selected] }}</h5>
-                              <p class="mb-1">{{ trimItemId(calculateItemId(r, {variantId: v.variant_id_trimmed}), true)
+                              <p class="mb-1">{{ trimItemId(calculateItemId(r, {variantId: v.variant_id_trimmed}),
+                                true)
                                 }}</p>
                             </div>
                             <div class="btn-group btn-group-lg ms-2" role="group"
@@ -340,7 +372,7 @@
                             <img v-if="r.wrappingPaper.color.length > 0" :src="getBagPicture(r)" class="icon" />
                           </label>
                           <select v-model="r.wrappingPaper.color" :id="r.internal_name + '-diy-select-wrapping-paper'"
-                            class="form-select captialize" aria-label="Select wrapping paper">
+                            class="form-select text-capitalize" aria-label="Select wrapping paper">
                             <option selected value="">None</option>
                             <option v-for="option in itemData.wrappingPaper" :value="option.color">
                               {{ option.color.replace(/\w\S*/g, txt=> txt.charAt(0).toUpperCase() +
@@ -428,8 +460,8 @@
   </div>
 </body>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@3.2.0-beta.8/dist/vue.global.min.js"></script>
 <script src="script.js"></script>
 

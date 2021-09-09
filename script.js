@@ -25,7 +25,6 @@
           result: [],
           resultVariants: [],
           moreThan100: false,
-          openMenu: false,
         },
         itemVariants: {
           open: "",
@@ -44,6 +43,9 @@
         pref: {
           diySeparateCmd: true,
           showToast: true,
+          wrappingPaper: {
+            color: "", withName: false,
+          },
           language: {
             selected: "",
             options: [
@@ -122,6 +124,12 @@
         });
         return 'https://acnhcdn.com/latest/MenuIcon/WBag' + color.charAt(0).toUpperCase() + color.slice(1) + '.png';
       },
+      getWrappingPaperName(option) {
+        if (this.pref.language.selected.length > 0)
+          return this.itemData.translated.STR_ItemName_80_Etc.find(i => i.internal_name == option.internal_name).name;
+        else return option.color.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() +
+          txt.substr(1).toLowerCase());
+      },
       calculateItemId(item, opt = {}) {
         let variantId = (opt && opt.variantId) ? opt.variantId : "",
           isDiy = (opt && opt.isDiy) ? opt.isDiy : false,
@@ -189,7 +197,6 @@
       },
       searchItems(text, language) {
         this.search.results = [];
-
         if (text.length > 0) {
           Object.entries(this.itemData.translated).forEach(([key, val]) => {
             if (this.search.results.length < 100)
@@ -224,7 +231,7 @@
                 }, []);
               }
             }
-            r.wrappingPaper = { color: "", withName: false };
+            r.wrappingPaper = Object.assign({}, this.pref.wrappingPaper);
           });
         }
         this.saveToLocalStorage();
@@ -274,10 +281,11 @@
       };
     },
     watch: {
-      "pref.language.selected"(to) {
-        fetch("./ACNH/item_ids/items_" + this.pref.language.selected + ".json")
-          .then(response => response.json())
-          .then(json => this.itemData.translated = json);
+      async "pref.language.selected"(to) {
+        let json = await fetch("./ACNH/item_ids/items_" + this.pref.language.selected + ".json")
+          .then(response => response.json());
+        this.itemData.translated = json;
+        if (this.search.text.length > 0) this.searchItems(this.search.text);
         this.saveToLocalStorage();
       },
       "search.text"(to) {
