@@ -197,27 +197,40 @@
             </div>
           </div>
         </fieldset>
-        <fieldset id="default-item-settings" class="collapse row row-cols-lg-auto g-3 align-items-center mb-3">
-          <div class="col-12">
-            <label class="visually-hidden text-capitalize">Default wrapping paper</label>
-            <div class="input-group">
-              <label class="input-group-text" for="select-default-wrapping-paper"><i class="bi-gift"></i></label>
-              <select v-model="pref.wrappingPaper.color" id="select-default-wrapping-paper"
-                class="form-select text-capitalize" aria-label="Select wrapping paper">
-                <option selected value="">None</option>
-                <option v-for="option in itemData.wrappingPaper" :value="option.color">
-                  {{ getWrappingPaperName(option) }}
-                </option>
-              </select>
+        <fieldset id="default-item-settings" class="collapse">
+          <div class="row row-cols-lg-auto g-3 align-items-center mb-3">
+            <div class="col-12">
+              <label class="visually-hidden text-capitalize">Default wrapping paper</label>
+              <div class="input-group">
+                <label class="input-group-text" for="select-default-wrapping-paper"><i class="bi-gift"></i></label>
+                <select v-model="pref.wrappingPaper.color" id="select-default-wrapping-paper"
+                  class="form-select text-capitalize" aria-label="Select wrapping paper">
+                  <option selected value="">None</option>
+                  <option v-for="option in itemData.wrappingPaper" :value="option.color">
+                    {{ getWrappingPaperName(option) }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="col-12" v-if="pref.wrappingPaper.color.length > 0">
+              <div class="form-check">
+                <input v-model="pref.wrappingPaper.withName" class="form-check-input" type="checkbox"
+                  id="default-wrapping-paper-with-name">
+                <label class="form-check-label" for="default-wrapping-paper-with-name">
+                  With Name
+                </label>
+              </div>
             </div>
           </div>
-          <div class="col-12" v-if="pref.wrappingPaper.color.length > 0">
-            <div class="form-check">
-              <input v-model="pref.wrappingPaper.withName" class="form-check-input" type="checkbox"
-                id="default-wrapping-paper-with-name">
-              <label class="form-check-label" for="default-wrapping-paper-with-name">
-                With Name
-              </label>
+          <div class="row row-cols-lg-auto g-3 align-items-center mb-3">
+            <div class="col-12">
+              <label for="nhi-upload" class="form-label mb-0">Load Inventory (*.nhi)</label>
+            </div>
+            <div class="col-12 flex-grow-1">
+              <div class="input-group">
+                <label class="input-group-text"><i class="bi-exclamation-diamond"></i></label>
+                <input class="form-control" type="file" id="nhi-upload" accept=".nhi" @change="readNhi">
+              </div>
             </div>
           </div>
         </fieldset>

@@ -236,6 +236,22 @@
         }
         this.saveToLocalStorage();
       },
+      readNhi(e) {
+        let buf2hex = buffer => Array.prototype.map.call(new Uint8Array(buffer),
+          x => ("00" + x.toString(16)).slice(-2).toUpperCase());
+        const file = e.target.files[0],
+          reader = new FileReader();
+        reader.onload = e => {
+          let buffer = e.target.result,
+            hex = buf2hex(buffer);
+          // ["AB", "CD", "12", "34", ...] -> ["CDAB", "3412", ...]
+          hex = hex.reduce((r, e, i) => (i % 2 ? r[r.length - 1] = e + r[r.length - 1] : r.push(e)) && r, []);
+          // ["1234","5678","9ABC","DEF0", "1234", ...] -> [["1234","5678","9ABC","DEF0"], ...]
+          hex = hex.reduce((r, e, i) => (i % 4 ? r[r.length - 1].unshift(e) : r.push([e])) && r, []);
+          this.selected.items = this.selected.items.concat(hex);
+        }
+        reader.readAsArrayBuffer(file);
+      }
     },
     created() {
       if (localStorage.getItem("data")) {
