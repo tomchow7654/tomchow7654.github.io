@@ -96,6 +96,11 @@
                 <span class="mx-1">{{ splitedDiys[index-1].join(" ") }}</span>
               </li>
             </ul>
+            <div class="d-grid gap-2 mb-2" v-if="selected.items.length > 0">
+              <button type="button" class="btn btn-outline-success" @click="saveNhi">
+                <i class="bi-file-earmark-arrow-down me-2"></i> Save current inventory
+              </button>
+            </div>
           </div>
 
           <div class="px-3 mb-3 border-bottom d-none">

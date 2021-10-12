@@ -251,7 +251,42 @@
           this.selected.items = this.selected.items.concat(hex);
         }
         reader.readAsArrayBuffer(file);
-      }
+      },
+      saveNhi() {
+        let emptyItem = ["0000", "0000", "0000", "FFFE"],
+          data = this.selected.items.splice(0, 40);
+        while (data.length < 40) { data.push(emptyItem); }
+
+        let hexdata = data.reduce((hexstring, item) => {
+          let array = Object.assign([], item);
+          while (array.length > 0) {
+            let h = array.pop();
+            hexstring += h.slice(2) + h.slice(0, -2);
+          }
+          return hexstring;
+        }, "");
+
+        let byteArray = new Uint8Array(hexdata.length / 2);
+        for (let x = 0; x < byteArray.length; x++)
+          byteArray[x] = parseInt(hexdata.substr(x * 2, 2), 16);
+
+        let blob = new Blob([byteArray], { type: "application/octet-stream" });
+        const link = document.createElement("a"); // Create a link element
+
+        // Set link's href to point to the Blob URL
+        link.href = URL.createObjectURL(blob);
+        link.download = "inventory.nhi";
+
+        // Append link to the body
+        document.body.appendChild(link);
+
+        // Dispatch click event on the link
+        // This is necessary as link.click() does not work on the latest firefox
+        link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+
+        // Remove link from body
+        document.body.removeChild(link);
+      },
     },
     created() {
       if (localStorage.getItem("data")) {
