@@ -246,8 +246,9 @@
             hex = buf2hex(buffer);
           // ["AB", "CD", "12", "34", ...] -> ["CDAB", "3412", ...]
           hex = hex.reduce((r, e, i) => (i % 2 ? r[r.length - 1] = e + r[r.length - 1] : r.push(e)) && r, []);
-          // ["1234","5678","9ABC","DEF0", "1234", ...] -> [["1234","5678","9ABC","DEF0"], ...]
+          // ["1234", "5678", "9ABC", "DEF0", "1234", ...] -> [["1234", "5678", "9ABC", "DEF0"], ...]
           hex = hex.reduce((r, e, i) => (i % 4 ? r[r.length - 1].unshift(e) : r.push([e])) && r, []);
+          hex = hex.filter(item => item[3] != "FFFE");
           this.selected.items = this.selected.items.concat(hex);
         }
         reader.readAsArrayBuffer(file);
