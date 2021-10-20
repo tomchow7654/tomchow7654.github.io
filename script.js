@@ -274,9 +274,12 @@
         let blob = new Blob([byteArray], { type: "application/octet-stream" });
         const link = document.createElement("a"); // Create a link element
 
+        let date = new Date(), offset = date.getTimezoneOffset();
+        date = new Date(date.getTime() - (offset * 60 * 1000))
+        
         // Set link's href to point to the Blob URL
         link.href = URL.createObjectURL(blob);
-        link.download = "inventory.nhi";
+        link.download = date.toISOString().replace(/-|:|/g, "").replace(/T/g, "_").slice(0, -5) + ".nhi";
 
         // Append link to the body
         document.body.appendChild(link);
