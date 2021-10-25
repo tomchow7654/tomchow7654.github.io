@@ -7,12 +7,10 @@
   <meta name="description" content="">
   <title>ACNH item id lookup (Multi-language)</title>
 
-
-
   <!-- Bootstrap core CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.6.1/font/bootstrap-icons.css">
 
   <style>
     .bd-placeholder-img {
@@ -21,14 +19,6 @@
       -webkit-user-select: none;
       -moz-user-select: none;
       user-select: none;
-    }
-
-    #copy-box {
-      position: absolute;
-      z-index: -1;
-      top: -50px;
-      opacity: 0;
-      pointer-events: none;
     }
 
     @media (min-width: 768px) {
@@ -43,443 +33,521 @@
   <link href="style.css" rel="stylesheet">
 </head>
 
-<body id="app">
+<body>
+  <div id="app" v-cloak>
 
-  <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-    <span class="navbar-brand col-md-3 col-lg-2 me-0 px-3">{{ title }}</span>
-    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse"
-      data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-  </header>
+    <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+      <span class="navbar-brand col-md-3 col-lg-2 me-0 px-3">{{ title }}</span>
+      <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse"
+        data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </header>
 
-  <div class="container-fluid">
-    <div class="row">
-      <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse overflow-auto">
-        <div class="position-sticky d-flex flex-column h-100">
-          <div class="p-3 mb-3 border-bottom">
-            <span class="fs-5 fw-semibold">Menu</span>
-          </div>
-
-          <div class="px-3 mb-3 border-bottom">
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
-              <span>Selected</span>
-              <a class="link-secondary" href="#" aria-label="Clear" @click="selected.items = []; selected.diys = [];">
-                <i class="bi-x" aria-hidden="true"></i>
-              </a>
-            </h6>
-
-            <ul class="list-group list-group-flush">
-              <li v-for="index in Math.ceil(selected.items.length / selected.splitBy)" style="background: inherit;"
-                class="list-group-item px-0">
-                <div class="d-flex justify-content-between align-items-start">
-                  <input v-model="selected.itemPrefix" type="text" style="max-width: 100%;"
-                    class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
-                  <button class="ms-2 btn" @click="copy(selected.itemPrefix + ' ' + joinSelected(splitedItems[index - 1])); 
-                  selected.items.splice((index - 1) * selected.splitBy, selected.splitBy);">
-                    <i class="bi-clipboard ms-2"></i>
-                  </button>
-                </div>
-                <span class="mx-1">{{ joinSelected(splitedItems[index-1]) }}</span>
-              </li>
-
-              <li v-for="index in Math.ceil(selected.diys.length / selected.splitBy)" style="background: inherit;"
-                class="list-group-item px-0">
-                <div class="d-flex justify-content-between align-items-start">
-                  <input v-model="selected.diyPrefix" type="text" style="max-width: 100%;"
-                    class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
-                  <button class="ms-2 btn" @click="copy(selected.diyPrefix + ' ' + splitedDiys[index - 1].join(' ')); 
-                  selected.diys.splice((index - 1) * selected.splitBy, selected.splitBy);">
-                    <i class="bi-clipboard ms-2"></i>
-                  </button>
-                </div>
-                <span class="mx-1">{{ splitedDiys[index-1].join(" ") }}</span>
-              </li>
-            </ul>
-            <div class="d-grid gap-2 mb-2" v-if="selected.items.length > 0">
-              <button type="button" class="btn btn-outline-success" @click="saveNhi">
-                <i class="bi-file-earmark-arrow-down me-2"></i> Save current inventory
-              </button>
+    <div class="container-fluid">
+      <div class="row">
+        <nav id="sidebarMenu" class="col-md-3 d-md-block bg-light sidebar collapse overflow-auto">
+          <div class="position-sticky d-flex flex-column h-100">
+            <div class="p-3 mb-3 border-bottom">
+              <span class="fs-5 fw-semibold">Side Menu</span>
             </div>
-          </div>
 
-          <div class="px-3 mb-3 border-bottom d-none">
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
-              <span>History</span>
-              <a class="link-secondary" href="#" aria-label="Add a new report">
-                <i class="bi-x" aria-hidden="true"></i>
-              </a>
-            </h6>
-            <ul class="nav flex-column mb-2">
-              <li class="nav-item px-0">
-                <a class="nav-link" href="#">
-                  <i class="bi-file-text" aria-hidden="true"></i>
-                  Current month
+            <div class="px-3 mb-3 border-bottom">
+              <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
+                <span>Selected <template v-if="selected.items.length+selected.diys.length > 0">
+                    ({{selected.items.length + selected.diys.length }})
+                  </template>
+                </span>
+                <a class="link-secondary" href="#" aria-label="Clear selected"
+                  @click="selected.items = []; selected.diys = [];">
+                  <i class="bi-x" aria-hidden="true"></i>
                 </a>
-              </li>
-            </ul>
-          </div>
+              </h6>
 
-          <div class="px-3 mb-3 border-bottom">
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
-              <span>Preferences</span>
-            </h6>
+              <ul class="list-group list-group-flush">
+                <li v-for="index in Math.ceil(selected.items.length / pref.item.splitBy)" style="background: inherit;"
+                  class="list-group-item px-0">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <input v-model="pref.item.itemPrefix" type="text" style="max-width: 100%;"
+                      class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
+                    <button class="ms-2 btn" @click="copy(pref.item.itemPrefix + ' ' + selection.join(selection.splited.items[index - 1])); 
+                  selected.items.splice((index - 1) * pref.item.splitBy, pref.item.splitBy);">
+                      <i class="bi-clipboard"></i>
+                    </button>
+                  </div>
+                  <span class="mx-1">{{ selection.join(selection.splited.items[index-1]) }}</span>
+                </li>
 
-            <ul class="nav flex-column mb-2">
-              <li class="nav-item my-2 form-check form-switch">
-                <input v-model="pref.showToast" class="form-check-input" type="checkbox" id="show-toast"
-                  checked="pref.showToast">
-                <label class="form-check-label" for="show-toast">Show Toast</label>
-              </li>
-
-              <li class="nav-item my-2">
-                <label class="form-label" for="split-by">Split By</label>
-                <input v-model="selected.splitBy" class="form-control form-control-sm" type="number" id="split-by">
-              </li>
-            </ul>
-          </div>
-
-          <footer class="footer mt-auto px-3">
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
-              <span>Data Source</span>
-            </h6>
-
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <i class="bi-github"></i>
-                <ol class="breadcrumb">
-                  <li class="breadcrumb-item"><a href="https://github.com/imthe666st/" target="_blank">imthe666st</a>
-                  </li>
-                  <li class="breadcrumb-item"><a href="https://github.com/imthe666st/ACNH" target="_blank">ACNH</a>
-                  </li>
-                </ol>
-              </li>
-              <li class="nav-item">
-                <i class="bi-github"></i>
-                <ol class="breadcrumb">
-                  <li class="breadcrumb-item"><a href="https://github.com/alexislours/" target="_blank">alexislours</a>
-                  </li>
-                  <li class="breadcrumb-item"><a href="https://github.com/alexislours/translation-sheet-data"
-                      target="_blank">translation-sheet-data</a>
-                  </li>
-                </ol>
-              </li>
-            </ul>
-        </div>
-        </footer>
-    </div>
-    </nav>
-
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-      <div
-        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">{{ title }}</h1>
-      </div>
-
-      <form @submit.prevent="return false;">
-        <fieldset class="row row-cols-lg-auto g-3 align-items-center mb-3">
-          <div class="col-12">
-            <label class="visually-hidden" for="languageSelector">Language</label>
-            <div class="input-group">
-              <label class="input-group-text" for="languageSelector"><i class="bi-globe"></i></label>
-              <select v-model="pref.language.selected" class="form-select" name="languageSelector">
-                <option value="" disabled selected>Choose...</option>
-                <option v-for="l in pref.language.options" :value="l.value">{{ l.text }}</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="col-12 flex-grow-1">
-            <label class="visually-hidden">Search</label>
-            <div class="input-group">
-              <label class="input-group-text"><i class="bi-search"></i></label>
-              <input v-model="search.text" type="text" class="form-control" placeholder="Search" aria-label="search"
-                aria-describedby="search">
-              <button class="btn btn-outline-info" type="button" data-bs-toggle="collapse"
-                data-bs-target="#default-item-settings" aria-expanded="false" aria-controls="default-item-settings">
-                <i class="bi bi-three-dots-vertical"></i>
-              </button>
-            </div>
-          </div>
-        </fieldset>
-        <fieldset id="default-item-settings" class="collapse">
-          <div class="row row-cols-lg-auto g-3 align-items-center mb-3">
-            <div class="col-12">
-              <label class="visually-hidden text-capitalize">Default wrapping paper</label>
-              <div class="input-group">
-                <label class="input-group-text" for="select-default-wrapping-paper"><i class="bi-gift"></i></label>
-                <select v-model="pref.wrappingPaper.color" id="select-default-wrapping-paper"
-                  class="form-select text-capitalize" aria-label="Select wrapping paper">
-                  <option selected value="">None</option>
-                  <option v-for="option in itemData.wrappingPaper" :value="option.color">
-                    {{ getWrappingPaperName(option) }}
-                  </option>
-                </select>
+                <li v-for="index in Math.ceil(selected.diys.length / pref.item.splitBy)" style="background: inherit;"
+                  class="list-group-item px-0">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <input v-model="pref.item.diyPrefix" type="text" style="max-width: 100%;"
+                      class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
+                    <button class="ms-2 btn" @click="copy(pref.item.diyPrefix + ' ' + selection.splited.diys[index - 1].join(' ')); 
+                  selected.diys.splice((index - 1) * pref.item.splitBy, pref.item.splitBy);">
+                      <i class="bi-clipboard"></i>
+                    </button>
+                  </div>
+                  <span class="mx-1">{{ selection.splited.diys[index-1].join(" ") }}</span>
+                </li>
+              </ul>
+              <div class="d-flex gap-2 justify-content-center mb-2" v-if="selected.items.length > 0">
+                <button type="button" class="btn btn-outline-primary" @click="selection.undo"
+                  :disabled="!selection.canUndo">Undo</button>
+                <button type="button" class="btn btn-outline-primary" @click="selection.redo"
+                  :disabled="!selection.canRedo">Redo</button>
+              </div>
+              <div class="d-grid gap-2 mb-2" v-if="selected.items.length > 0">
+                <button type="button" class="btn btn-outline-success" @click="nhi.export">
+                  <i class="bi-file-earmark-arrow-down me-2"></i> Save current inventory
+                </button>
               </div>
             </div>
-            <div class="col-12" v-if="pref.wrappingPaper.color.length > 0">
-              <div class="form-check">
-                <input v-model="pref.wrappingPaper.withName" class="form-check-input" type="checkbox"
-                  id="default-wrapping-paper-with-name">
-                <label class="form-check-label" for="default-wrapping-paper-with-name">
-                  With Name
-                </label>
-              </div>
-            </div>
-          </div>
-          <div class="row row-cols-lg-auto g-3 align-items-center mb-3">
-            <div class="col-12">
-              <label for="nhi-upload" class="form-label mb-0">Load Inventory (*.nhi)</label>
-            </div>
-            <div class="col-12 flex-grow-1">
-              <div class="input-group">
-                <label class="input-group-text"><i class="bi-exclamation-diamond"></i></label>
-                <input class="form-control" type="file" id="nhi-upload" accept=".nhi" @change="readNhi">
-              </div>
-            </div>
-          </div>
-        </fieldset>
-      </form>
 
-      <div v-if="pref.language.selected.length > 0" class="container">
-        <div v-if="search.text.length > 0 && search.moreThan100" class="alert alert-warning" role="alert">
-          Only showing the first 100 results.
-        </div>
-        <div id="search-result" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
-          <template v-for="r in search.results">
-            <div class="col">
-              <div class="card border-primary mb-3">
-                <div class="card-body">
-                  <h5 class="card-title text-truncate-2">{{ r.name }} {{ variant(r) }}</h5>
-                  <p class="card-text">{{ trimItemId(calculateItemId(r), true) }}</p>
-                  <div class="btn-group btn-group-lg" role="group" aria-label="action button group">
-                    <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r)) ? 'btn-success': 
+            <div class="px-3 mb-3 border-bottom" v-if="data.translation[pref.language] && selection.history.length > 0">
+              <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
+                <span>History</span>
+                <a class="link-secondary" href="#" aria-label="Clear history" @click="selection.history.splice(0)">
+                  <i class="bi-x" aria-hidden="true"></i>
+                </a>
+              </h6>
+              <ul class="list-group list-group-flush">
+                <li v-for="(ids, i) in selection.history" style="background: inherit;"
+                  class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                  <span class="mx-1 text-truncate">{{ search.byId(ids[3]).result[0].name }}</span>
+                  <button class="ms-2 btn" @click="selection.addHex(ids)">
+                    <i class="bi-plus"></i>
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <div class="px-3 mb-3 border-bottom">
+              <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
+                <span>Preferences</span>
+              </h6>
+
+              <ul class="nav flex-column mb-2">
+                <li class="nav-item my-2 form-check form-switch">
+                  <input v-model="pref.showToast" class="form-check-input" type="checkbox" id="show-toast"
+                    checked="pref.showToast">
+                  <label class="form-check-label" for="show-toast">Show Toast</label>
+                </li>
+
+                <li class="nav-item my-2 form-check form-switch">
+                  <input v-model="pref.preventAlt" class="form-check-input" type="checkbox" id="prevent-alt"
+                    checked="pref.preventAlt">
+                  <label class="form-check-label" for="prevent-alt">Block Alt key from revealing menu</label>
+                </li>
+
+                <li class="nav-item my-2">
+                  <label class="form-label" for="split-by">Split By</label>
+                  <input v-model="pref.item.splitBy" class="form-control form-control-sm" type="number" id="split-by">
+                </li>
+              </ul>
+            </div>
+
+            <footer class="footer mt-auto px-3">
+              <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
+                <span>Data Source</span>
+              </h6>
+
+              <ul class="nav flex-column">
+                <li class="nav-item">
+                  <i class="bi-github"></i>
+                  <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="https://github.com/imthe666st/" target="_blank">imthe666st</a>
+                    </li>
+                    <li class="breadcrumb-item"><a href="https://github.com/imthe666st/ACNH" target="_blank">ACNH</a>
+                    </li>
+                  </ol>
+                </li>
+                <li class="nav-item">
+                  <i class="bi-github"></i>
+                  <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="https://github.com/alexislours/"
+                        target="_blank">alexislours</a>
+                    </li>
+                    <li class="breadcrumb-item"><a href="https://github.com/alexislours/translation-sheet-data"
+                        target="_blank">translation-sheet-data</a>
+                    </li>
+                  </ol>
+                </li>
+              </ul>
+            </footer>
+          </div>
+        </nav>
+
+        <main class="col-md-9 ms-sm-auto px-md-4">
+          <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">{{ title }}</h1>
+          </div>
+
+          <form @submit.prevent="return false;">
+            <fieldset class="row row-cols-lg-auto g-3 align-items-center mb-3">
+              <div class="col-12">
+                <label class="visually-hidden" for="languageSelector">Language</label>
+                <div class="input-group">
+                  <label class="input-group-text" for="languageSelector"><i class="bi-globe"></i></label>
+                  <select v-model="pref.language" class="form-select" name="languageSelector">
+                    <option value="" disabled selected>Choose...</option>
+                    <option v-for="l in languages" :value="l.value">{{ l.text }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-12 flex-grow-1">
+                <label class="visually-hidden">Search</label>
+                <div class="input-group">
+                  <label class="input-group-text"><i class="bi-search"></i></label>
+                  <input ref="search-box" v-model="search.text" type="text" class="form-control" placeholder="Search"
+                    aria-label="search" aria-describedby="search">
+                  <button class="btn btn-outline-info" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#default-item-settings" aria-expanded="false" aria-controls="default-item-settings">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset id="default-item-settings" class="collapse">
+              <div class="row row-cols-lg-auto g-3 align-items-center mb-3">
+                <div class="col-12">
+                  <label class="visually-hidden text-capitalize">Default wrapping paper</label>
+                  <div class="input-group">
+                    <label class="input-group-text" for="select-default-wrapping-paper"><i class="bi-gift"></i></label>
+                    <select v-model="pref.wrappingPaper.color" id="select-default-wrapping-paper"
+                      class="form-select text-capitalize" aria-label="Select wrapping paper">
+                      <option selected value="">None</option>
+                      <option v-for="option in data.wrappingPaper" :value="option.color">
+                        {{ data.getWrappingPaperName(option.internal_name) }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-12" v-if="pref.wrappingPaper.color.length > 0">
+                  <div class="form-check">
+                    <input v-model="pref.wrappingPaper.withName" class="form-check-input" type="checkbox"
+                      id="default-wrapping-paper-with-name">
+                    <label class="form-check-label" for="default-wrapping-paper-with-name">
+                      With Name
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="row row-cols-lg-auto g-3 align-items-center mb-3">
+                <div class="col-12">
+                  <label for="nhi-upload" class="form-label mb-0">Load Inventory (*.nhi)</label>
+                </div>
+                <div class="col-12 flex-grow-1">
+                  <div class="input-group">
+                    <label class="input-group-text"><i class="bi-exclamation-diamond"></i></label>
+                    <input class="form-control" type="file" id="nhi-upload" accept=".nhi" @change="nhi.import">
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+
+          <div v-if="pref.language.length > 0">
+            <div v-if="search.text.length > 0 && search.moreThan100" class="alert alert-warning" role="alert">
+              Only showing the first 100 results.
+            </div>
+            <div id="search-result" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
+              <template v-for="(r, index) in search.result">
+                <div class="col">
+                  <div class="card border-primary mb-3">
+                    <div class="card-body">
+                      <h5 class="card-title text-truncate-2">{{ r.name }} {{ otherInformation(r) }}</h5>
+                      <p class="card-text">{{ trimItemId(calculateItemId(r), true) }}</p>
+                      <div class="btn-group btn-group-lg" role="group" aria-label="action button group">
+                        <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r)) ? 'btn-success': 
                       'btn-primary']" @click="copy(trimItemId(calculateItemId(r)))">
-                      <i :class="[copyText == trimItemId(calculateItemId(r)) ? 'bi-check' : 'bi-clipboard']"
-                        aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="btn btn-primary" @click="addToSelected(r)">
-                      <i class="bi-plus" aria-hidden="true"></i>
-                    </button>
+                          <i :class="[copyText == trimItemId(calculateItemId(r)) ? 'bi-check' : 'bi-clipboard']"
+                            aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btn btn-primary" @click="selection.add(r)">
+                          <i class="bi-plus" aria-hidden="true"></i>
+                        </button>
 
-                    <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
-                        data-bs-auto-close="outside" aria-expanded="false">
-                        <i class="bi bi-three-dots-vertical"></i>
-                      </button>
-                      <ul class="dropdown-menu" aria-labelledby="variant selector button group"
-                        style="width: max-content; min-width: 300px;">
-                        <li v-if="!!r.stack" class="dropdown-item-text mb-3">
-                          <div class="d-flex align-items-center">
-                            <label :for="r.internal_name + '-item-count'" class="form-label mb-0 me-2">Count</label>
-                            <input v-model="r.stack.current" :id="r.internal_name + '-item-count'" type="number"
-                              class="form-control form-control-sm ms-2" min="1" :max="r.stack.max" step="1" size="2">
-                          </div>
-                          <input v-model="r.stack.current" type="range" class="form-range" min="1" :max="r.stack.max"
-                            step="1">
-                        </li>
-                        <li v-if="!!r.durability" class="dropdown-item-text mb-3">
-                          <div class="d-flex align-items-center">
-                            <label :for="r.internal_name + '-item-count'"
-                              class="form-label mb-0 me-2">Durability</label>
-                            <input v-model="r.durability.current" :id="r.internal_name + '-item-count'" type="number"
-                              class="form-control form-control-sm ms-2" min="1" :max="r.durability.max" step="1"
-                              size="3">
-                          </div>
-                          <input v-model="r.durability.current" type="range" class="form-range" min="1"
-                            :max="r.durability.max" step="1">
-                        </li>
-                        <li class="dropdown-item-text mb-3">
-                          <label :for="r.internal_name + '-select-wrapping-paper'"
-                            class="form-label d-flex justify-content-between">
-                            <span>Wrapping Paper</span>
-                            <img v-if="r.wrappingPaper.color.length > 0" :src="getBagPicture(r)" class="icon" />
-                          </label>
-                          <select v-model="r.wrappingPaper.color" :id="r.internal_name + '-select-wrapping-paper'"
-                            class="form-select text-capitalize" aria-label="Select wrapping paper">
-                            <option selected value="">None</option>
-                            <option v-for="option in itemData.wrappingPaper" :value="option.color">
-                              {{ itemData.translated.STR_ItemName_80_Etc.find(i=> i.internal_name ==
-                              option.internal_name).name }}
-                            </option>
-                          </select>
-                        </li>
-
-                        <li v-if="r.wrappingPaper.color.length > 0" class="dropdown-item-text mb-3">
-                          <div class="form-check">
-                            <input v-model="r.wrappingPaper.withName" class="form-check-input" type="checkbox"
-                              :id="r.internal_name + '-wrapping-paper-with-name'">
-                            <label class="form-check-label" :for="r.internal_name + '-wrapping-paper-with-name'">
-                              With Name
-                            </label>
-                          </div>
-                        </li>
-
-                        <li v-if="!r.variants" class="dropdown-item-text btn-group btn-group-lg ms-2" role="group"
-                          aria-label="variant selector button group">
-                          <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r)) ? 'btn-success': 
-                            'btn-outline-info']" @click="copy(trimItemId(calculateItemId(r)))">
-                            <i :class="[copyText == trimItemId(calculateItemId(r)) ? 'bi-check' : 'bi-clipboard']"
-                              aria-hidden="true"></i>
+                        <div class="btn-group" role="group">
+                          <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
                           </button>
-                          <button type="button" class="btn btn-outline-info" @click="addToSelected(r)">
-                            <i class="bi-plus" aria-hidden="true"></i>
-                          </button>
-                        </li>
-                        <template v-else>
-                          <li v-for="v in r.variants" class="dropdown-item-text d-flex" aria-current="true">
-                            <div class="flex-grow-1">
-                              <h5 class="mb-1">{{ v.locale[pref.language.selected] }}</h5>
-                              <p class="mb-1">{{ trimItemId(calculateItemId(r, {variantId: v.variant_id_trimmed}),
-                                true)
-                                }}</p>
-                            </div>
-                            <div class="btn-group btn-group-lg ms-2" role="group"
+                          <ul class="dropdown-menu" aria-labelledby="variant selector button group"
+                            style="width: max-content; min-width: 300px;">
+                            <li v-if="!!r.stack" class="dropdown-item-text mb-3">
+                              <div class="d-flex align-items-center">
+                                <label :for="r.internal_name + '-item-count'" class="form-label mb-0 me-2">Count</label>
+                                <input v-model="r.stack.current" :id="r.internal_name + '-item-count'" type="number"
+                                  class="form-control form-control-sm ms-2" min="1" :max="r.stack.max" step="1"
+                                  size="2">
+                              </div>
+                              <input v-model="r.stack.current" type="range" class="form-range" min="1"
+                                :max="r.stack.max" step="1">
+                            </li>
+                            <li v-if="!!r.durability" class="dropdown-item-text mb-3">
+                              <div class="d-flex align-items-center">
+                                <label :for="r.internal_name + '-item-count'"
+                                  class="form-label mb-0 me-2">Durability</label>
+                                <input v-model="r.durability.current" :id="r.internal_name + '-item-count'"
+                                  type="number" class="form-control form-control-sm ms-2" min="1"
+                                  :max="r.durability.max" step="1" size="3">
+                              </div>
+                              <input v-model="r.durability.current" type="range" class="form-range" min="1"
+                                :max="r.durability.max" step="1">
+                            </li>
+                            <li class="dropdown-item-text mb-3">
+                              <label :for="r.internal_name + '-select-wrapping-paper'"
+                                class="form-label d-flex justify-content-between">
+                                <span>Wrapping Paper</span>
+                                <img v-if="r.wrappingPaper.color.length > 0" :src="data.getBagPicture(r)"
+                                  class="icon" />
+                              </label>
+                              <select v-model="r.wrappingPaper.color" :id="r.internal_name + '-select-wrapping-paper'"
+                                class="form-select text-capitalize" aria-label="Select wrapping paper">
+                                <option selected value="">None</option>
+                                <option v-for="option in data.wrappingPaper" :value="option.color">
+                                  {{ data.getWrappingPaperName(option.internal_name) }}
+                                </option>
+                              </select>
+                            </li>
+
+                            <li v-if="r.wrappingPaper.color.length > 0" class="dropdown-item-text mb-3">
+                              <div class="form-check">
+                                <input v-model="r.wrappingPaper.withName" class="form-check-input" type="checkbox"
+                                  :id="r.internal_name + '-wrapping-paper-with-name'">
+                                <label class="form-check-label" :for="r.internal_name + '-wrapping-paper-with-name'">
+                                  With Name
+                                </label>
+                              </div>
+                            </li>
+
+                            <li v-if="!r.variants" class="dropdown-item-text btn-group btn-group-lg ms-2" role="group"
                               aria-label="variant selector button group">
-                              <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r, {variantId: 
-                                v.variant_id_trimmed})) ? 'btn-success': 'btn-outline-info']" @click="copy(trimItemId(
-                                calculateItemId(r, {variantId: v.variant_id_trimmed})))">
-                                <i :class="[copyText == trimItemId(calculateItemId(r, {variantId: v.variant_id_trimmed})) ? 
-                                  'bi-check' : 'bi-clipboard']" aria-hidden="true"></i>
+                              <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r)) ? 'btn-success': 
+                            'btn-outline-info']" @click="copy(trimItemId(calculateItemId(r)))">
+                                <i :class="[copyText == trimItemId(calculateItemId(r)) ? 'bi-check' : 'bi-clipboard']"
+                                  aria-hidden="true"></i>
                               </button>
-                              <button type="button" class="btn btn-outline-info" @click="addToSelected(r, 
-                              {variantId: v.variant_id_trimmed})">
+                              <button type="button" class="btn btn-outline-info" @click="selection.add(r)">
                                 <i class="bi-plus" aria-hidden="true"></i>
                               </button>
-                            </div>
-                          </li>
-                        </template>
-                      </ul>
+                            </li>
+                            <template v-else>
+                              <li v-for="v in r.variants" class="dropdown-item-text d-flex" aria-current="true">
+                                <div class="flex-grow-1">
+                                  <h5 class="mb-1">{{ v.locale[pref.language] }}</h5>
+                                  <p class="mb-1">{{ trimItemId(calculateItemId(r, {variantId: v.variant_id_trimmed}),
+                                    true)
+                                    }}</p>
+                                </div>
+                                <div class="btn-group btn-group-lg ms-2" role="group"
+                                  aria-label="variant selector button group">
+                                  <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r, {variantId: 
+                                v.variant_id_trimmed})) ? 'btn-success': 'btn-outline-info']" @click="copy(trimItemId(
+                                calculateItemId(r, {variantId: v.variant_id_trimmed})))">
+                                    <i :class="[copyText == trimItemId(calculateItemId(r, {variantId: v.variant_id_trimmed})) ? 
+                                  'bi-check' : 'bi-clipboard']" aria-hidden="true"></i>
+                                  </button>
+                                  <button type="button" class="btn btn-outline-info" @click="selection.add(r, 
+                              {variantId: v.variant_id_trimmed})">
+                                    <i class="bi-plus" aria-hidden="true"></i>
+                                  </button>
+                                </div>
+                              </li>
+                            </template>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="index < 9" :class="['position-absolute', 'top-0', 'start-100', 'translate-middle', 'fs-3', 
+                      {'d-none': !altState}]">
+                      <span class="badge bg-warning">
+                        {{ index + 1 }}
+                        <span class="visually-hidden">index</span>
+                      </span>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div v-if="r.DiyRecipe" class="col">
-              <div class="card border-secondary mb-3">
-                <div class="card-body">
-                  <h5 class="card-title text-truncate-2">{{ r.name }} (DIY)</h5>
-                  <p class="card-text">{{ trimItemId(calculateItemId(r,
-                    {isDiy: true, command : (pref.diySeparateCmd ? "diy" : "drop")}), true) }}</p>
-                  <div class="btn-group btn-group-lg" role="group" aria-label="action button group">
-                    <button type="button" :class="['btn', trimItemId(calculateItemId(r, {isDiy: true, command : 
-                      (pref.diySeparateCmd ? 'diy' : 'drop')})) == copyText ? 'btn-success': 'btn-secondary']"
-                      @click="copy(trimItemId(calculateItemId(r, {isDiy: true, command : (pref.diySeparateCmd ? 'diy' : 'drop')})))">
-                      <i :class="[trimItemId(calculateItemId(r, {isDiy: true, command : (pref.diySeparateCmd ? 'diy' : 'drop')})) 
+                <div v-if="r.DiyRecipe" class="col">
+                  <div class="card border-secondary mb-3">
+                    <div class="card-body">
+                      <h5 class="card-title text-truncate-2">{{ r.name }} (DIY)</h5>
+                      <p class="card-text">{{ trimItemId(calculateItemId(r,
+                        {isDiy: true, command : (pref.item.diySeparateCmd ? "diy" : "drop")}), true) }}</p>
+                      <div class="btn-group btn-group-lg" role="group" aria-label="action button group">
+                        <button type="button" :class="['btn', trimItemId(calculateItemId(r, {isDiy: true, command : 
+                      (pref.item.diySeparateCmd ? 'diy' : 'drop')})) == copyText ? 'btn-success': 'btn-secondary']"
+                          @click="copy(trimItemId(calculateItemId(r, {isDiy: true, command : (pref.item.diySeparateCmd ? 'diy' : 'drop')})))">
+                          <i :class="[trimItemId(calculateItemId(r, {isDiy: true, command : (pref.item.diySeparateCmd ? 'diy' : 'drop')})) 
                         == copyText ? 'bi-check' : 'bi-clipboard']" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="btn btn-secondary" @click="addToSelected(r, {isDiy: true, 
-                      command : (pref.diySeparateCmd ? 'diy' : 'drop')})">
-                      <i class="bi-plus" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="btn btn-secondary" @click="pref.diySeparateCmd = !pref.diySeparateCmd">
-                      {{ pref.diySeparateCmd ? (selected.diyPrefix.length == 0 ? "DIY" : selected.diyPrefix)
-                      : (selected.itemPrefix.length == 0 ? "Item" : selected.itemPrefix) }}
-                    </button>
-                    <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
-                        data-bs-auto-close="outside" aria-expanded="false">
-                        <i class="bi bi-three-dots-vertical"></i>
-                      </button>
-                      <ul class="dropdown-menu" aria-labelledby="variant selector button group"
-                        style="width: max-content; min-width: 300px;">
-                        <li class="dropdown-item-text mb-3">
-                          <label :for="r.internal_name + '-diy-select-wrapping-paper'"
-                            class="form-label d-flex justify-content-between">
-                            <span>Wrapping Paper</span>
-                            <img v-if="r.wrappingPaper.color.length > 0" :src="getBagPicture(r)" class="icon" />
-                          </label>
-                          <select v-model="r.wrappingPaper.color" :id="r.internal_name + '-diy-select-wrapping-paper'"
-                            class="form-select text-capitalize" aria-label="Select wrapping paper">
-                            <option selected value="">None</option>
-                            <option v-for="option in itemData.wrappingPaper" :value="option.color">
-                              {{ option.color.replace(/\w\S*/g, txt=> txt.charAt(0).toUpperCase() +
-                              txt.substr(1).toLowerCase())}}
-                            </option>
-                          </select>
-                        </li>
+                        </button>
+                        <button type="button" class="btn btn-secondary" @click="selection.add(r, {isDiy: true, 
+                      command : (pref.item.diySeparateCmd ? 'diy' : 'drop')})">
+                          <i class="bi-plus" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btn btn-secondary"
+                          @click="pref.item.diySeparateCmd = !pref.item.diySeparateCmd">
+                          {{ pref.item.diySeparateCmd ? (pref.item.diyPrefix.length == 0 ? "DIY" : pref.item.diyPrefix)
+                          : (pref.item.itemPrefix.length == 0 ? "Item" : pref.item.itemPrefix) }}
+                        </button>
+                        <div class="btn-group" role="group">
+                          <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                          </button>
+                          <ul class="dropdown-menu" aria-labelledby="variant selector button group"
+                            style="width: max-content; min-width: 300px;">
+                            <li class="dropdown-item-text mb-3">
+                              <label :for="r.internal_name + '-diy-select-wrapping-paper'"
+                                class="form-label d-flex justify-content-between">
+                                <span>Wrapping Paper</span>
+                                <img v-if="r.wrappingPaper.color.length > 0" :src="data.getBagPicture(r)"
+                                  class="icon" />
+                              </label>
+                              <select v-model="r.wrappingPaper.color"
+                                :id="r.internal_name + '-diy-select-wrapping-paper'" class="form-select text-capitalize"
+                                aria-label="Select wrapping paper">
+                                <option selected value="">None</option>
+                                <option v-for="option in data.wrappingPaper" :value="option.color">
+                                  {{ option.color.replace(/\w\S*/g, txt=> txt.charAt(0).toUpperCase() +
+                                  txt.substr(1).toLowerCase())}}
+                                </option>
+                              </select>
+                            </li>
 
-                        <li v-if="r.wrappingPaper.color.length > 0" class="dropdown-item-text mb-3">
-                          <div class="form-check">
-                            <input v-model="r.wrappingPaper.withName" class="form-check-input" type="checkbox" value=""
-                              :id="r.internal_name + '-diy-wrapping-paper-with-name'">
-                            <label class="form-check-label" :for="r.internal_name + '-diy-wrapping-paper-with-name'">
-                              With Name
-                            </label>
-                          </div>
-                        </li>
+                            <li v-if="r.wrappingPaper.color.length > 0" class="dropdown-item-text mb-3">
+                              <div class="form-check">
+                                <input v-model="r.wrappingPaper.withName" class="form-check-input" type="checkbox"
+                                  value="" :id="r.internal_name + '-diy-wrapping-paper-with-name'">
+                                <label class="form-check-label"
+                                  :for="r.internal_name + '-diy-wrapping-paper-with-name'">
+                                  With Name
+                                </label>
+                              </div>
+                            </li>
 
-                        <li class="dropdown-item-text btn-group btn-group-lg ms-2" role="group"
-                          aria-label="variant selector button group">
-                          <button type="button" :class="['btn', trimItemId(calculateItemId(r, {isDiy: true, command : 
-                            (pref.diySeparateCmd ? 'diy' : 'drop')})) == copyText ? 'btn-success': 'btn-outline-info']"
-                            @click="copy(trimItemId(calculateItemId(r, {isDiy: true, command : (pref.diySeparateCmd ? 'diy' : 
+                            <li class="dropdown-item-text btn-group btn-group-lg ms-2" role="group"
+                              aria-label="variant selector button group">
+                              <button type="button"
+                                :class="['btn', trimItemId(calculateItemId(r, {isDiy: true, command : 
+                            (pref.item.diySeparateCmd ? 'diy' : 'drop')})) == copyText ? 'btn-success': 'btn-outline-info']" @click="copy(trimItemId(calculateItemId(r, {isDiy: true, command : (pref.item.diySeparateCmd ? 'diy' : 
                             'drop')})))">
-                            <i :class="[trimItemId(calculateItemId(r, {isDiy: true, command : (pref.diySeparateCmd ? 'diy' : 
+                                <i :class="[trimItemId(calculateItemId(r, {isDiy: true, command : (pref.item.diySeparateCmd ? 'diy' : 
                               'drop')})) == copyText ? 'bi-check' : 'bi-clipboard']" aria-hidden="true"></i>
-                          </button>
-                          <button type="button" class="btn btn-outline-info" @click="addToSelected(r, {isDiy: 
-                            true, command : (pref.diySeparateCmd ? 'diy' : 'drop')})">
-                            <i class="bi-plus" aria-hidden="true"></i>
-                          </button>
-                        </li>
-                      </ul>
+                              </button>
+                              <button type="button" class="btn btn-outline-info" @click="selection.add(r, {isDiy: 
+                            true, command : (pref.item.diySeparateCmd ? 'diy' : 'drop')})">
+                                <i class="bi-plus" aria-hidden="true"></i>
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
+              </template>
+            </div>
+          </div>
+          <div v-if="search.result.length == 0" class="mt-4">
+            <h2 class="h4">Keyboard Shortcuts<i class="bi-keyboard ms-2"></i></h2>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Keys</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row"><code>/</code></th>
+                  <td>Start searching</td>
+                </tr>
+                <tr>
+                  <th scope="row">Hold <code>Alt</code></th>
+                  <td>Reveal first 9 items' order</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>Alt</code> + <code>[1-9]</code></th>
+                  <td>Add [1-9]th items to selected</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>Alt</code> + <code>C</code></th>
+                  <td>Copy first selected command</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>Alt</code> + <code>D</code></th>
+                  <td>Save current inventory</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>Ctrl</code> + <code>Z</code></th>
+                  <td>Undo last insertion to selected</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>Ctrl</code> + <code>Y</code> (or <code>Ctrl</code> + <code>Shift</code> +
+                    <code>Z</code>)</th>
+                  <td>Redo last insertion to selected</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="toast-container position-sticky bottom-0 start-50 translate-middle-x p-3">
+            <template v-if="selected.items.length > 0">
+              <div v-for="index in Math.ceil(selected.items.length / pref.item.splitBy)"
+                class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                  <div class="toast-body d-flex">
+                    <input v-model="pref.item.itemPrefix" type="text"
+                      class="form-control form-control-sm transparent-textbox" placeholder="Items:"
+                      :style="{width: pref.item.itemPrefix.length + 'rem'}">
+                    <span class="">{{ selection.join(selection.splited.items[index-1]) }}</span>
+                  </div>
+                  <button type="button" class="btn me-2 m-auto" aria-label="Copy"
+                    @click="copy(pref.item.itemPrefix + ' ' + 
+                  selection.join(selection.splited.items[index - 1])); selected.items.splice((index - 1) * pref.item.splitBy, pref.item.splitBy);">
+                    <i class="bi-clipboard"></i>
+                  </button>
+                  <button type="button" class="btn-close mx-2 my-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+                </div>
               </div>
-            </div>
-          </template>
-        </div>
-      </div>
-    </main>
-  </div>
-  <input id="copy-box" v-model="copyText" type="text" ref="copyBox" aria-hidden="true">
-  <div aria-live="polite" aria-atomic="true" class="position-relative">
-    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
-      <template v-if="selected.items.length > 0">
-        <div v-for="index in Math.ceil(selected.items.length / selected.splitBy)" class="toast align-items-center"
-          role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="d-flex">
-            <div class="toast-body d-flex">
-              <input v-model="selected.itemPrefix" type="text" class="form-control form-control-sm transparent-textbox"
-                placeholder="Items:" :style="{width: selected.itemPrefix.length + 'rem'}">
-              <span class="">{{ joinSelected(splitedItems[index-1]) }}</span>
-            </div>
-            <button type="button" class="btn me-2 m-auto" aria-label="Copy"
-              @click="copy(selected.itemPrefix + ' ' + 
-              joinSelected(splitedItems[index - 1])); selected.items.splice((index - 1) * selected.splitBy, selected.splitBy);">
-              <i class="bi-clipboard"></i>
-            </button>
-            <button type="button" class="btn-close mx-2 my-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-        </div>
-      </template>
+            </template>
 
-      <template v-if="selected.diys.length > 0">
-        <div v-for="index in Math.ceil(selected.diys.length / selected.splitBy)" class="toast align-items-center"
-          role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="d-flex">
-            <div class="toast-body d-flex">
-              <input v-model="selected.diyPrefix" type="text" class="form-control form-control-sm transparent-textbox"
-                placeholder="DIYs:" :style="{width: selected.itemPrefix.length + 'rem'}">
-              <span class="">{{ splitedDiys[index-1].join(" ") }}</span>
-            </div>
-            <button type="button" class="btn me-2 m-auto" aria-label="Copy" @click="copy(selected.diyPrefix + ' ' + 
-            splitedDiys[index-1].join(' ')); selected.diys.splice( (index - 1) * selected.splitBy, selected.splitBy);">
-              <i class="bi-clipboard"></i>
-            </button>
-            <button type="button" class="btn-close mx-2 my-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            <template v-if="selected.diys.length > 0">
+              <div v-for="index in Math.ceil(selected.diys.length / pref.item.splitBy)" class="toast align-items-center"
+                role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                  <div class="toast-body d-flex">
+                    <input v-model="pref.item.diyPrefix" type="text"
+                      class="form-control form-control-sm transparent-textbox" placeholder="DIYs:"
+                      :style="{width: pref.item.itemPrefix.length + 'rem'}">
+                    <span class="">{{ selection.splited.diys[index-1].join(" ") }}</span>
+                  </div>
+                  <button type="button" class="btn me-2 m-auto" aria-label="Copy"
+                    @click="copy(pref.item.diyPrefix + ' ' + 
+                selection.splited.diys[index-1].join(' ')); selected.diys.splice( (index - 1) * pref.item.splitBy, pref.item.splitBy);">
+                    <i class="bi-clipboard"></i>
+                  </button>
+                  <button type="button" class="btn-close mx-2 my-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+                </div>
+              </div>
+            </template>
           </div>
-        </div>
-      </template>
+        </main>
+      </div>
     </div>
   </div>
 </body>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/vue@3.2.0-beta.8/dist/vue.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@3.2.20/dist/vue.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vueuse/shared@6.7.3/index.iife.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vueuse/core@6.7.3/index.iife.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 <script src="script.js"></script>
 
 </html>
