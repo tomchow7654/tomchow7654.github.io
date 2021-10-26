@@ -24,7 +24,7 @@ let useHexUtil = ({ data, pref, selected }) => {
       else if (variantId.length > 0) b = variantId.toString(16).toUpperCase().padStart(4, "0");
 
       if (item.wrappingPaper.color.length > 0) {
-        let color = data.wrappingPaper.find(c => c.color == item.wrappingPaper.color);
+        let color = data.wrappingPaper.find(paper => paper.color == item.wrappingPaper.color);
         c = item.wrappingPaper.withName ? color.withName : color.hex;
       }
       return [a, b, c, d];
@@ -343,8 +343,7 @@ let app = {
       box.focus(); box.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
     });
     const activeElement = useActiveElement()
-    const notUsingInput = computed(() => activeElement.value?.tagName !== 'INPUT' &&
-      activeElement.value?.tagName !== 'TEXTAREA');
+    const notUsingInput = computed(() => !["INPUT", "TEXTAREA"].includes(activeElement.value.tagName));
     watchEffect(() => {
       for (let i = 1; i <= 9; i++)
         if (keys["Alt+" + i].value && search.result[i - 1])

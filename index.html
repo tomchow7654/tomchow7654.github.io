@@ -58,10 +58,10 @@
                     ({{selected.items.length + selected.diys.length }})
                   </template>
                 </span>
-                <a class="link-secondary" href="#" aria-label="Clear selected"
-                  @click="selected.items = []; selected.diys = [];">
+                <button class="ms-2 btn btn-sm" @click="selected.items = []; selected.diys = [];"
+                  aria-label="Clear selected">
                   <i class="bi-x" aria-hidden="true"></i>
-                </a>
+                </button>
               </h6>
 
               <ul class="list-group list-group-flush">
@@ -72,7 +72,7 @@
                       class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
                     <button class="ms-2 btn" @click="copy(pref.item.itemPrefix + ' ' + selection.join(selection.splited.items[index - 1])); 
                   selected.items.splice((index - 1) * pref.item.splitBy, pref.item.splitBy);">
-                      <i class="bi-clipboard"></i>
+                      <i class="bi-clipboard" aria-hidden="true"></i>
                     </button>
                   </div>
                   <span class="mx-1">{{ selection.join(selection.splited.items[index-1]) }}</span>
@@ -85,7 +85,7 @@
                       class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
                     <button class="ms-2 btn" @click="copy(pref.item.diyPrefix + ' ' + selection.splited.diys[index - 1].join(' ')); 
                   selected.diys.splice((index - 1) * pref.item.splitBy, pref.item.splitBy);">
-                      <i class="bi-clipboard"></i>
+                      <i class="bi-clipboard" aria-hidden="true"></i>
                     </button>
                   </div>
                   <span class="mx-1">{{ selection.splited.diys[index-1].join(" ") }}</span>
@@ -93,13 +93,17 @@
               </ul>
               <div class="d-flex gap-2 justify-content-center mb-2" v-if="selected.items.length > 0">
                 <button type="button" class="btn btn-outline-primary" @click="selection.undo"
-                  :disabled="!selection.canUndo">Undo</button>
+                  :disabled="!selection.canUndo">
+                  <i class="bi bi-arrow-counterclockwise me-2" aria-hidden="true"></i>Undo
+                </button>
                 <button type="button" class="btn btn-outline-primary" @click="selection.redo"
-                  :disabled="!selection.canRedo">Redo</button>
+                  :disabled="!selection.canRedo">
+                  <i class="bi bi-arrow-clockwise me-2" aria-hidden="true"></i>Redo
+                </button>
               </div>
               <div class="d-grid gap-2 mb-2" v-if="selected.items.length > 0">
                 <button type="button" class="btn btn-outline-success" @click="nhi.export">
-                  <i class="bi-file-earmark-arrow-down me-2"></i> Save current inventory
+                  <i class="bi-file-earmark-arrow-down me-2" aria-hidden="true"></i> Save current inventory
                 </button>
               </div>
             </div>
@@ -107,16 +111,16 @@
             <div class="px-3 mb-3 border-bottom" v-if="data.translation[pref.language] && selection.history.length > 0">
               <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
                 <span>History</span>
-                <a class="link-secondary" href="#" aria-label="Clear history" @click="selection.history.splice(0)">
+                <button class="ms-2 btn btn-sm" @click="selection.history.splice(0)" aria-label="Clear history">
                   <i class="bi-x" aria-hidden="true"></i>
-                </a>
+                </button>
               </h6>
               <ul class="list-group list-group-flush">
                 <li v-for="(ids, i) in selection.history" style="background: inherit;"
                   class="list-group-item px-0 d-flex justify-content-between align-items-center">
                   <span class="mx-1 text-truncate">{{ search.byId(ids[3]).result[0].name }}</span>
                   <button class="ms-2 btn" @click="selection.addHex(ids)">
-                    <i class="bi-plus"></i>
+                    <i class="bi-plus" aria-hidden="true"></i>
                   </button>
                 </li>
               </ul>
@@ -140,9 +144,14 @@
                   <label class="form-check-label" for="prevent-alt">Block Alt key from revealing menu</label>
                 </li>
 
-                <li class="nav-item my-2">
-                  <label class="form-label" for="split-by">Split By</label>
-                  <input v-model="pref.item.splitBy" class="form-control form-control-sm" type="number" id="split-by">
+                <li class="nav-item my-2 row gy-2 gx-3 align-items-center">
+                  <div class="col-auto">
+                    <label class="form-label mb-0" for="split-by">Split By</label>
+                  </div>
+                  <div class="col-6 flex-grow-1">
+                    <label class="visually-hidden" for="split-by">Split By</label>
+                    <input v-model="pref.item.splitBy" class="form-control form-control-sm" type="number" id="split-by">
+                  </div>
                 </li>
               </ul>
             </div>
@@ -153,18 +162,18 @@
               </h6>
 
               <ul class="nav flex-column">
-                <li class="nav-item">
-                  <i class="bi-github"></i>
-                  <ol class="breadcrumb">
+                <li class="nav-item row my-2">
+                  <i class="bi-github col-auto" aria-hidden="true"></i>
+                  <ol class="breadcrumb col-6 flex-grow-1 mb-0">
                     <li class="breadcrumb-item"><a href="https://github.com/imthe666st/" target="_blank">imthe666st</a>
                     </li>
                     <li class="breadcrumb-item"><a href="https://github.com/imthe666st/ACNH" target="_blank">ACNH</a>
                     </li>
                   </ol>
                 </li>
-                <li class="nav-item">
-                  <i class="bi-github"></i>
-                  <ol class="breadcrumb">
+                <li class="nav-item row my-2">
+                  <i class="bi-github col-auto" aria-hidden="true"></i>
+                  <ol class="breadcrumb col-6 flex-grow-1 mb-0">
                     <li class="breadcrumb-item"><a href="https://github.com/alexislours/"
                         target="_blank">alexislours</a>
                     </li>
@@ -189,7 +198,8 @@
               <div class="col-12">
                 <label class="visually-hidden" for="languageSelector">Language</label>
                 <div class="input-group">
-                  <label class="input-group-text" for="languageSelector"><i class="bi-globe"></i></label>
+                  <label class="input-group-text" for="languageSelector"><i class="bi-globe"
+                      aria-hidden="true"></i></label>
                   <select v-model="pref.language" class="form-select" name="languageSelector">
                     <option value="" disabled selected>Choose...</option>
                     <option v-for="l in languages" :value="l.value">{{ l.text }}</option>
@@ -200,12 +210,12 @@
               <div class="col-12 flex-grow-1">
                 <label class="visually-hidden">Search</label>
                 <div class="input-group">
-                  <label class="input-group-text"><i class="bi-search"></i></label>
+                  <label class="input-group-text"><i class="bi-search" aria-hidden="true"></i></label>
                   <input ref="search-box" v-model="search.text" type="text" class="form-control" placeholder="Search"
                     aria-label="search" aria-describedby="search">
                   <button class="btn btn-outline-info" type="button" data-bs-toggle="collapse"
                     data-bs-target="#default-item-settings" aria-expanded="false" aria-controls="default-item-settings">
-                    <i class="bi bi-three-dots-vertical"></i>
+                    <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
                   </button>
                 </div>
               </div>
@@ -215,7 +225,8 @@
                 <div class="col-12">
                   <label class="visually-hidden text-capitalize">Default wrapping paper</label>
                   <div class="input-group">
-                    <label class="input-group-text" for="select-default-wrapping-paper"><i class="bi-gift"></i></label>
+                    <label class="input-group-text" for="select-default-wrapping-paper"><i class="bi-gift"
+                        aria-hidden="true"></i></label>
                     <select v-model="pref.wrappingPaper.color" id="select-default-wrapping-paper"
                       class="form-select text-capitalize" aria-label="Select wrapping paper">
                       <option selected value="">None</option>
@@ -241,7 +252,7 @@
                 </div>
                 <div class="col-12 flex-grow-1">
                   <div class="input-group">
-                    <label class="input-group-text"><i class="bi-exclamation-diamond"></i></label>
+                    <label class="input-group-text"><i class="bi-exclamation-diamond" aria-hidden="true"></i></label>
                     <input class="form-control" type="file" id="nhi-upload" accept=".nhi" @change="nhi.import">
                   </div>
                 </div>
@@ -273,7 +284,7 @@
                         <div class="btn-group" role="group">
                           <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
                             data-bs-auto-close="outside" aria-expanded="false">
-                            <i class="bi bi-three-dots-vertical"></i>
+                            <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
                           </button>
                           <ul class="dropdown-menu" aria-labelledby="variant selector button group"
                             style="width: max-content; min-width: 300px;">
@@ -396,7 +407,7 @@
                         <div class="btn-group" role="group">
                           <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
                             data-bs-auto-close="outside" aria-expanded="false">
-                            <i class="bi bi-three-dots-vertical"></i>
+                            <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
                           </button>
                           <ul class="dropdown-menu" aria-labelledby="variant selector button group"
                             style="width: max-content; min-width: 300px;">
@@ -453,7 +464,7 @@
             </div>
           </div>
           <div v-if="search.result.length == 0" class="mt-4">
-            <h2 class="h4">Keyboard Shortcuts<i class="bi-keyboard ms-2"></i></h2>
+            <h2 class="h4">Keyboard Shortcuts<i class="bi-keyboard ms-2" aria-hidden="true"></i></h2>
             <table class="table">
               <thead>
                 <tr>
@@ -488,7 +499,8 @@
                 </tr>
                 <tr>
                   <th scope="row"><code>Ctrl</code> + <code>Y</code> (or <code>Ctrl</code> + <code>Shift</code> +
-                    <code>Z</code>)</th>
+                    <code>Z</code>)
+                  </th>
                   <td>Redo last insertion to selected</td>
                 </tr>
               </tbody>
@@ -508,7 +520,7 @@
                   <button type="button" class="btn me-2 m-auto" aria-label="Copy"
                     @click="copy(pref.item.itemPrefix + ' ' + 
                   selection.join(selection.splited.items[index - 1])); selected.items.splice((index - 1) * pref.item.splitBy, pref.item.splitBy);">
-                    <i class="bi-clipboard"></i>
+                    <i class="bi-clipboard" aria-hidden="true"></i>
                   </button>
                   <button type="button" class="btn-close mx-2 my-auto" data-bs-dismiss="toast"
                     aria-label="Close"></button>
@@ -529,7 +541,7 @@
                   <button type="button" class="btn me-2 m-auto" aria-label="Copy"
                     @click="copy(pref.item.diyPrefix + ' ' + 
                 selection.splited.diys[index-1].join(' ')); selected.diys.splice( (index - 1) * pref.item.splitBy, pref.item.splitBy);">
-                    <i class="bi-clipboard"></i>
+                    <i class="bi-clipboard" aria-hidden="true"></i>
                   </button>
                   <button type="button" class="btn-close mx-2 my-auto" data-bs-dismiss="toast"
                     aria-label="Close"></button>
