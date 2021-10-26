@@ -145,7 +145,7 @@ let useCopyUtil = () => {
 let app = {
   setup(props) {
     let pref = useLocalStorage("pref", {
-      language: "", showToast: false, wrappingPaper: { color: "", showName: false }, preventAlt: true,
+      language: "", showToast: false, wrappingPaper: { color: "", withName: false }, preventAlt: true,
       item: { diySeparateCmd: false, itemPrefix: "", diyPrefix: "", splitBy: 5 }
     }), data = reactive({}), search = reactive({}), selected = ref({ items: [], diys: [] }),
       loading = reactive({ language: false, variants: false, stack: false, durability: false }),
