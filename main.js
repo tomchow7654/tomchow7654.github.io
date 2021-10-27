@@ -173,7 +173,7 @@ let app = {
 
     data.getWrappingPaperName = internal_name => {
       let name = "";
-      if (pref.value.language.length > 0 && loading.any) {
+      if (pref.value.language.length > 0 && !loading.any) {
         var list = data.translation[pref.value.language].STR_ItemName_80_Etc,
           found = list.find(i => i.internal_name == internal_name);
         if (found) name = found.name
@@ -260,7 +260,7 @@ let app = {
       return { result, moreThan100: result.length > 100 };
     };
     throttledWatch(() => search.text, to => {
-      if (pref.value.language.length > 0 && loading.language) {
+      if (pref.value.language.length > 0 && !loading.language) {
         let r = search.byName(to);
         search.result = hexUtil.injectItemData(r.result);
         search.mmoreThan100 = r.moreThan100;
