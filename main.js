@@ -366,7 +366,7 @@ let app = {
       }
     });
     const altState = useKeyModifier("Alt");
-    return { title, search, selected, selection, pref, data, languages, ...hexUtil, ...copyUtil, altState };
+    return { title, loading, search, selected, selection, pref, data, languages, ...hexUtil, ...copyUtil, altState };
   },
 };
 Vue.createApp(app).mount('#app');
