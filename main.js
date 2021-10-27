@@ -23,9 +23,9 @@ let useHexUtil = ({ data, pref, selected }) => {
       else if (!!item.stack) b = (item.stack.current - 1).toString(16).toUpperCase().padStart(4, "0");
       else if (variantId.length > 0) b = variantId.toString(16).toUpperCase().padStart(4, "0");
 
-      if (item.wrappingPaper.color.length > 0) {
+      if (item.wrappingPaper.color.length > 0 && !!data.wrappingPaper) {
         let color = data.wrappingPaper.find(paper => paper.color == item.wrappingPaper.color);
-        c = item.wrappingPaper.withName ? color.withName : color.hex;
+        if (color) c = item.wrappingPaper.withName ? color.withName : color.hex;
       }
       return [a, b, c, d];
     },
@@ -148,7 +148,7 @@ let app = {
       language: "", showToast: false, wrappingPaper: { color: "", withName: false }, preventAlt: true,
       item: { diySeparateCmd: false, itemPrefix: "", diyPrefix: "", splitBy: 5 }
     }), data = reactive({}), search = reactive({}), selected = ref({ items: [], diys: [] }),
-      loading = reactive({ language: false, variants: false, stack: false, durability: false }),
+      loading = reactive({ language: true, variants: true, stack: true, durability: true, wrappingPaper: true }),
       hexUtil = useHexUtil({ data, pref, selected }),
       copyUtil = useCopyUtil();
     Object.assign(data, {
@@ -165,14 +165,15 @@ let app = {
         if (!arr.includes(r.id)) arr.push(r.id);
         return arr;
       }, []);
+      loading.variants = true;
     });
-    fetchJSON("./data/durability.json").then(json => data.durability = json);
-    fetchJSON("./data/stack.json").then(json => data.stack = json);
-    fetchJSON("./data/wrapping paper.json").then(json => data.wrappingPaper = json);
+    fetchJSON("./data/durability.json").then(json => { data.durability = json; loading.durability = false; });
+    fetchJSON("./data/stack.json").then(json => { data.stack = json; loading.stack = false; });
+    fetchJSON("./data/wrapping paper.json").then(json => { data.wrappingPaper = json; loading.wrappingPaper = false; });
 
     data.getWrappingPaperName = internal_name => {
       let name = "";
-      if (pref.value.language.length > 0 && data.translation[pref.value.language]) {
+      if (pref.value.language.length > 0 && loading.any) {
         var list = data.translation[pref.value.language].STR_ItemName_80_Etc,
           found = list.find(i => i.internal_name == internal_name);
         if (found) name = found.name
@@ -216,6 +217,8 @@ let app = {
       }
       // if (search.text.length > 0) searchItems(search.text);
     }, { debounce: 500, immediate: true });
+    loading.any = computed(() => loading.language && loading.variants && loading.durability
+      && loading.stack && loading.wrappingPaper);
 
     watch(() => [pref.value.showToast, Math.ceil(selected.value.items.length / pref.value.item.splitBy),
     Math.ceil(selected.value.diys.length / pref.value.item.splitBy)], (to, from) => {
@@ -257,7 +260,7 @@ let app = {
       return { result, moreThan100: result.length > 100 };
     };
     throttledWatch(() => search.text, to => {
-      if (pref.value.language.length > 0 && data.translation[pref.value.language]) {
+      if (pref.value.language.length > 0 && loading.language) {
         let r = search.byName(to);
         search.result = hexUtil.injectItemData(r.result);
         search.mmoreThan100 = r.moreThan100;

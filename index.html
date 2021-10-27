@@ -52,7 +52,7 @@
               <span class="fs-5 fw-semibold">Side Menu</span>
             </div>
 
-            <div class="px-3 mb-3 border-bottom">
+            <div class="px-3 mb-3 border-bottom" v-if="!loading.any">
               <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
                 <span>Selected <template v-if="selected.items.length+selected.diys.length > 0">
                     ({{selected.items.length + selected.diys.length }})
@@ -108,7 +108,7 @@
               </div>
             </div>
 
-            <div class="px-3 mb-3 border-bottom" v-if="data.translation[pref.language] && selection.history.length > 0">
+            <div class="px-3 mb-3 border-bottom" v-if="!loading.any && selection.history.length > 0">
               <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
                 <span>History</span>
                 <button class="ms-2 btn btn-sm" @click="selection.history.splice(0)" aria-label="Clear history">
@@ -260,7 +260,10 @@
             </fieldset>
           </form>
 
-          <div v-if="pref.language.length > 0">
+          <div v-if="loading.any" class="spinner-border text-info" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div v-else-if="pref.language.length > 0">
             <div v-if="search.text.length > 0 && search.moreThan100" class="alert alert-warning" role="alert">
               Only showing the first 100 results.
             </div>
