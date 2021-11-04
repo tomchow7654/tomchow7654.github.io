@@ -165,7 +165,7 @@ let app = {
         if (!arr.includes(r.id)) arr.push(r.id);
         return arr;
       }, []);
-      loading.variants = true;
+      loading.variants = false;
     });
     fetchJSON("./data/durability.json").then(json => { data.durability = json; loading.durability = false; });
     fetchJSON("./data/stack.json").then(json => { data.stack = json; loading.stack = false; });
@@ -217,8 +217,8 @@ let app = {
       }
       // if (search.text.length > 0) searchItems(search.text);
     }, { debounce: 500, immediate: true });
-    loading.any = computed(() => loading.language && loading.variants && loading.durability
-      && loading.stack && loading.wrappingPaper);
+    loading.any = computed(() => loading.language || loading.variants || loading.durability
+      || loading.stack || loading.wrappingPaper);
 
     watch(() => [pref.value.showToast, Math.ceil(selected.value.items.length / pref.value.item.splitBy),
     Math.ceil(selected.value.diys.length / pref.value.item.splitBy)], (to, from) => {

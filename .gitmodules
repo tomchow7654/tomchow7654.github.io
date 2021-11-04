@@ -1,6 +1,6 @@
 [submodule "ACNH"]
 	path = ACNH
-	url = https://github.com/imthe666st/ACNH.git
+	url = https://github.com/Katsching/ACNH.git
 [submodule "translation-sheet-data"]
 	path = translation-sheet-data
 	url = https://github.com/alexislours/translation-sheet-data.git

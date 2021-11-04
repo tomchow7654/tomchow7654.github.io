@@ -118,7 +118,10 @@
               <ul class="list-group list-group-flush">
                 <li v-for="(ids, i) in selection.history" style="background: inherit;"
                   class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                  <span class="mx-1 text-truncate">{{ search.byId(ids[3]).result[0].name }}</span>
+                  <span class="mx-1 text-truncate">
+                    {{ search.byId(ids[3]).result[0].name }}
+                    {{ otherInformation(search.byId(ids[3]).result[0]) }}
+                  </span>
                   <button class="ms-2 btn" @click="selection.addHex(ids)">
                     <i class="bi-plus" aria-hidden="true"></i>
                   </button>
@@ -133,24 +136,29 @@
 
               <ul class="nav flex-column mb-2">
                 <li class="nav-item my-2 form-check form-switch">
-                  <input v-model="pref.showToast" class="form-check-input" type="checkbox" id="show-toast"
-                    checked="pref.showToast">
+                  <input v-model="pref.showToast" class="form-check-input" type="checkbox" id="show-toast">
                   <label class="form-check-label" for="show-toast">Show Toast</label>
                 </li>
 
                 <li class="nav-item my-2 form-check form-switch">
-                  <input v-model="pref.preventAlt" class="form-check-input" type="checkbox" id="prevent-alt"
-                    checked="pref.preventAlt">
+                  <input v-model="pref.preventAlt" class="form-check-input" type="checkbox" id="prevent-alt">
                   <label class="form-check-label" for="prevent-alt">Block Alt key from revealing menu</label>
                 </li>
 
-                <li class="nav-item my-2 row gy-2 gx-3 align-items-center">
+                <li class="nav-item my-2 form-check form-switch">
+                  <input v-model="pref.item.diySeparateCmd" class="form-check-input" type="checkbox"
+                    id="diy-separate-cmd">
+                  <label class="form-check-label" for="diy-separate-cmd">Add DIYs to separate command</label>
+                </li>
+
+                <li class="nav-item my-2 row align-items-center">
                   <div class="col-auto">
                     <label class="form-label mb-0" for="split-by">Split By</label>
                   </div>
                   <div class="col-6 flex-grow-1">
                     <label class="visually-hidden" for="split-by">Split By</label>
-                    <input v-model="pref.item.splitBy" class="form-control form-control-sm" type="number" id="split-by">
+                    <input v-model="pref.item.splitBy" class="form-control form-control-sm" type="number" id="split-by"
+                      min="1" step="1">
                   </div>
                 </li>
               </ul>
@@ -212,7 +220,7 @@
                 <div class="input-group">
                   <label class="input-group-text"><i class="bi-search" aria-hidden="true"></i></label>
                   <input ref="search-box" v-model="search.text" type="text" class="form-control" placeholder="Search"
-                    aria-label="search" aria-describedby="search">
+                    aria-label="search" aria-describedby="search" :disabled="loading.any">
                   <button class="btn btn-outline-info" type="button" data-bs-toggle="collapse"
                     data-bs-target="#default-item-settings" aria-expanded="false" aria-controls="default-item-settings">
                     <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
@@ -245,23 +253,18 @@
                     </label>
                   </div>
                 </div>
-              </div>
-              <div class="row row-cols-lg-auto g-3 align-items-center mb-3">
                 <div class="col-12">
-                  <label for="nhi-upload" class="form-label mb-0">Load Inventory (*.nhi)</label>
-                </div>
-                <div class="col-12 flex-grow-1">
-                  <div class="input-group">
-                    <label class="input-group-text"><i class="bi-exclamation-diamond" aria-hidden="true"></i></label>
-                    <input class="form-control" type="file" id="nhi-upload" accept=".nhi" @change="nhi.import">
-                  </div>
+                  <label for="nhi-upload" class="btn btn-outline-secondary">Load Inventory (*.nhi)</label>
+                  <input class="d-none" type="file" id="nhi-upload" accept=".nhi" @change="nhi.import">
                 </div>
               </div>
             </fieldset>
           </form>
 
-          <div v-if="loading.any" class="spinner-border text-info" role="status">
-            <span class="visually-hidden">Loading...</span>
+          <div v-if="loading.any" class="d-flex justify-content-center">
+            <div class="spinner-border text-info" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
           </div>
           <div v-else-if="pref.language.length > 0">
             <div v-if="search.text.length > 0 && search.moreThan100" class="alert alert-warning" role="alert">
