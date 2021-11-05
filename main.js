@@ -259,13 +259,13 @@ let app = {
       }
       return { result, moreThan100: result.length > 100 };
     };
-    throttledWatch(() => search.text, to => {
+    debouncedWatch(() => search.text, to => {
       if (pref.value.language.length > 0 && !loading.language) {
         let r = search.byName(to);
         search.result = hexUtil.injectItemData(r.result);
         search.mmoreThan100 = r.moreThan100;
       }
-    }, { throttle: 500 });
+    }, { debounce: 500 });
 
     const { undo, redo, canUndo, canRedo } = useRefHistory(selected, { deep: true, capacity: 15 });
     let selection = {
