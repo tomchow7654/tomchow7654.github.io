@@ -38,11 +38,10 @@ let useHexUtil = ({ data, pref, selected }) => {
     injectItemData(results) {
       return results.map(r => {
         if (r.internal_name) {
-          Object.values(data.stack).forEach(arr => { // adding stack data
-            let i = arr.findIndex(x => x.internal_name == r.internal_name);
-            if (i > -1)
-              r.stack = { current: arr[i].stack, max: arr[i].stack };
-          });
+          // adding stack data
+          let stackInfo = data.stack.find(x => x.internal_id == r.id[0]);
+          if (stackInfo && stackInfo.stack > 1)
+            r.stack = { current: stackInfo.stack, max: stackInfo.stack };
 
           let toolIndex = data.durability.findIndex(tool => tool.internal_name == r.internal_name);
           if (toolIndex > -1) r.durability = {
