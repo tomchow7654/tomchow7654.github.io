@@ -173,9 +173,8 @@ let app = {
     data.getWrappingPaperName = internal_name => {
       let name = "";
       if (pref.value.language.length > 0 && !loading.any) {
-        var list = data.translation[pref.value.language].STR_ItemName_80_Etc,
-          found = list.find(i => i.internal_name == internal_name);
-        if (found) name = found.name
+        var list = data.translation[pref.value.language].etcInternalNames;
+        if (list.has(internal_name)) name = list.get(internal_name).name;
       }
       return name;
     };
@@ -211,7 +210,16 @@ let app = {
       if (!(to in data.translation)) {
         loading.language = true;
         let json = await fetch("./ACNH/item_ids/items_" + to + ".json").then(response => response.json());
-        data.translation[to] = json;
+        let byName = new Map(), byId = new Map(), diyIds = new Map(), etcInternalNames = new Map();
+        Object.entries(json).forEach(([key, val]) => {
+          val.forEach(item => {
+            byId.set(item.id[1], item);
+            byName.set(item.id[1], item.name);
+            if (item.DiyRecipe) diyIds.set(item.DiyRecipe[1], item.id[1]);
+            if (key == "STR_ItemName_80_Etc") etcInternalNames.set(item.internal_name, item);
+          });
+        });
+        data.translation[to] = { raw: json, byName, byId, diyIds, etcInternalNames };
         loading.language = false;
       }
       // if (search.text.length > 0) searchItems(search.text);
@@ -235,34 +243,29 @@ let app = {
       moreThan100: false,
     });
     search.byName = (name, language) => {
-      let result = [];
+      let result = [], moreThan100 = false;
       if (!language) language = pref.value.language;
       if (name.length > 0) {
-        Object.entries(data.translation[language]).forEach(([key, val]) => {
-          if (result.length < 100)
-            result.push(...val.filter(item => item.name.toLowerCase().includes(name.toLowerCase())));
-        });
-        if (result.length > 100) result = result.slice(0, 100);
+        let names = Array.from(data.translation[language].byName.entries()),
+          found = names.filter(([key, val]) => val.toLowerCase().includes(name.toLowerCase()));
+        if (found.length > 100) {
+          moreThan100 = true;
+          found = found.slice(0, 100);
+        }
+        result = found.map(([key, val]) => data.translation[language].byId.get(key));
       }
-      return { result, moreThan100: result.length > 100 };
+      return { result, moreThan100 };
     };
     search.byId = (id, language) => {
-      let result = [];
       if (!language) language = pref.value.language;
-      if (id.length >= 4) {
-        Object.entries(data.translation[language]).forEach(([key, val]) => {
-          if (result.length < 100)
-            result.push(...val.filter(item => item.id[1] == id.toUpperCase()));
-        });
-        if (result.length > 100) result = result.slice(0, 100);
-      }
-      return { result, moreThan100: result.length > 100 };
+      if (id.length == 4) return data.translation[language].byId.get(id);
+      else return null;
     };
     debouncedWatch(() => search.text, to => {
       if (pref.value.language.length > 0 && !loading.language) {
         let r = search.byName(to);
         search.result = hexUtil.injectItemData(r.result);
-        search.mmoreThan100 = r.moreThan100;
+        search.moreThan100 = r.moreThan100;
       }
     }, { debounce: 500 });
 

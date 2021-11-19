@@ -119,8 +119,8 @@
                 <li v-for="(ids, i) in selection.history" style="background: inherit;"
                   class="list-group-item px-0 d-flex justify-content-between align-items-center">
                   <span class="mx-1 text-truncate">
-                    {{ search.byId(ids[3]).result[0].name }}
-                    {{ otherInformation(search.byId(ids[3]).result[0]) }}
+                    {{ search.byId(ids[3]).name }}
+                    {{ otherInformation(search.byId(ids[3])) }}
                   </span>
                   <button class="ms-2 btn" @click="selection.addHex(ids)">
                     <i class="bi-plus" aria-hidden="true"></i>
