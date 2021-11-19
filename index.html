@@ -91,7 +91,7 @@
                   <span class="mx-1">{{ selection.splited.diys[index-1].join(" ") }}</span>
                 </li>
               </ul>
-              <div class="d-flex gap-2 justify-content-center mb-2" v-if="selected.items.length > 0">
+              <div class="d-flex gap-2 justify-content-center mb-2">
                 <button type="button" class="btn btn-outline-primary" @click="selection.undo"
                   :disabled="!selection.canUndo">
                   <i class="bi bi-arrow-counterclockwise me-2" aria-hidden="true"></i>Undo
