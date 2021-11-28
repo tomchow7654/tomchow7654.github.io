@@ -267,6 +267,12 @@ let app = {
         search.result = hexUtil.injectItemData(r.result);
         search.moreThan100 = r.moreThan100;
       }
+      nextTick().then(() => {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+      });
     }, { debounce: 500 });
 
     const { undo, redo, canUndo, canRedo } = useRefHistory(selected, { deep: true, capacity: 15 });
@@ -312,12 +318,20 @@ let app = {
       })
     };
     let cache = JSON.parse(localStorage.getItem("search-cache"));
-    if (cache && cache.text) search.text = cache.text;
-    if (cache && cache.result) search.result = cache.result;
-    if (cache && cache.history) selection.history.push(...cache.history);
-    if (cache && cache.selected) {
-      if (cache.selected.items.length > 0) selected.value.items.push(...cache.selected.items);
-      if (cache.selected.diys.length > 0) selected.value.diys.push(...cache.selected.diys);
+    if (cache) {
+      if (cache.text) search.text = cache.text;
+      if (cache.result) search.result = cache.result;
+      if (cache.history) selection.history.push(...cache.history);
+      if (cache.selected) {
+        if (cache.selected.items.length > 0) selected.value.items.push(...cache.selected.items);
+        if (cache.selected.diys.length > 0) selected.value.diys.push(...cache.selected.diys);
+      }
+      nextTick().then(() => {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+      });
     }
     throttledWatch(() => ({
       text: search.text, history: selection.history, result: search.result, selected: {
@@ -368,7 +382,8 @@ let app = {
       }
     });
     const altState = useKeyModifier("Alt");
-    return { title, loading, search, selected, selection, pref, data, languages, ...hexUtil, ...copyUtil, altState };
+    const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+    return { title, loading, search, selected, selection, pref, data, languages, ...hexUtil, ...copyUtil, altState, scrollToTop };
   },
 };
 Vue.createApp(app).mount('#app');

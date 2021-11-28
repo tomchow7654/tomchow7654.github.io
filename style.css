@@ -153,3 +153,7 @@ img.icon {
 .transparent-textbox[type=number] {
   -moz-appearance: textfield;
 }
+
+.underline-first-letter:first-letter {
+  text-decoration:underline;
+}
