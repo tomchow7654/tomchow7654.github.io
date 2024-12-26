@@ -159,15 +159,6 @@ let app = {
     });
     let fetchJSON = async path => await fetch(path).then(resp => resp.json());
 
-    // fetchJSON("./translation-sheet-data/variants.json").then(json => {
-    //   data.variants.data = json;
-    //   data.variants.internal_names = json.reduce((arr, r) => {
-    //     if (!arr.includes(r.id)) arr.push(r.id);
-    //     return arr;
-    //   }, []);
-    //   loading.variants = false;
-    // });
-
     // https://gitlab.com/AeonSake2/acnh-translations
     // acnh-translations / JSON / String / Remake
     // JSON/String/Remake/STR_Remake_BodyParts.msbt.json <- title
