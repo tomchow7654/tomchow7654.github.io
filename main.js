@@ -10,7 +10,8 @@ let useHexUtil = ({ data, pref, selected }) => {
       return "";
     },
     calculateItemId(item, opt = {}) {
-      let variantId = (opt && opt.variantId) ? opt.variantId : "",
+      let variantId = (opt && opt.variantId) ? Number(opt.variantId) : -1,
+        fabricId = (opt && opt.fabricId) ? Number(opt.fabricId) : -1,
         isDiy = (opt && opt.isDiy) ? opt.isDiy : false,
         command = (opt && opt.command) ? opt.command : "diy";
       if (isDiy && command == "diy") return [item.DiyRecipe[1]];
@@ -21,7 +22,11 @@ let useHexUtil = ({ data, pref, selected }) => {
 
       if (isDiy) b = item.DiyRecipe[1];
       else if (!!item.stack) b = (item.stack.current - 1).toString(16).toUpperCase().padStart(4, "0");
-      else if (variantId.length > 0) b = variantId.toString(16).toUpperCase().padStart(4, "0");
+
+      let bCount = 0;
+      if (variantId != -1) bCount += variantId;
+      if (fabricId != -1) bCount += (fabricId * 32);
+      if (bCount > 0) b = (bCount).toString(16).toUpperCase().padStart(4, "0");
 
       if (item.wrappingPaper.color.length > 0 && !!data.wrappingPaper) {
         let color = data.wrappingPaper.find(paper => paper.color == item.wrappingPaper.color);
@@ -58,6 +63,15 @@ let useHexUtil = ({ data, pref, selected }) => {
               return arr;
             }, []);
           }
+          if (r.internal_name in data.fabric.internal_names) {
+            r.fabric = data.fabric.data.reduce((arr, v) => {
+              if (v.id == r.internal_name) {
+                v.fabric_id_trimmed = v.fabric_id.slice(v.fabric_id.lastIndexOf("_") + 1);
+                arr.push(v);
+              }
+              return arr;
+            }, []);
+          }
         }
         r.wrappingPaper = Object.assign({}, pref.value.wrappingPaper);
         return r;
@@ -66,6 +80,11 @@ let useHexUtil = ({ data, pref, selected }) => {
     variantTitle(item) {
       if (item.internal_name in data.variants.internal_names)
         return data.variants.internal_names[item.internal_name][pref.value.language];
+      else return "";
+    },
+    fabricTitle(item) {
+      if (item.internal_name in data.fabric.internal_names)
+        return data.fabric.internal_names[item.internal_name][pref.value.language];
       else return "";
     },
     nhi: {
@@ -152,12 +171,13 @@ let app = {
       language: "", showToast: false, wrappingPaper: { color: "", withName: false }, preventAlt: true,
       item: { diySeparateCmd: false, itemPrefix: "", diyPrefix: "", splitBy: 5 }
     }), data = reactive({}), search = reactive({}), selected = ref({ items: [], diys: [] }),
-      loading = reactive({ language: true, variants: true, stack: true, durability: true, wrappingPaper: true }),
+      loading = reactive({ language: true, variants: true, fabric: true, stack: true, durability: true, wrappingPaper: true }),
       hexUtil = useHexUtil({ data, pref, selected }),
       copyUtil = useCopyUtil();
     Object.assign(data, {
       translation: {},
       variants: { data: [], internal_names: {} },
+      fabric: { data: [], internal_names: {} },
       stack: {},
       durability: [],
       wrappingPaper: [],
@@ -182,6 +202,26 @@ let app = {
         return obj;
       }, {});
       loading.variants = false;
+    });
+
+    // fetch item fabric title (STR_Remake_BodyParts) & color (STR_Remake_BodyColor)
+    Promise.all([
+      fetchJSON("./acnh-translations/JSON/String/Remake/STR_Remake_FabricParts.msbt.json"),
+      fetchJSON("./acnh-translations/JSON/String/Remake/STR_Remake_FabricColor.msbt.json")
+    ]).then(([titleJson, colorJson]) => {
+      // transform json
+      let transformed = colorJson.map(item => ({
+        id: item.label.slice(0, item.label.lastIndexOf("_")),
+        variant_id: item.label,
+        locale: item.locale
+      }));
+
+      data.fabric.data = transformed;
+      data.fabric.internal_names = titleJson.reduce((obj, { label, locale }) => {
+        obj[label] = locale;
+        return obj;
+      }, {});
+      loading.fabric = false;
     });
 
     fetchJSON("./data/durability.json").then(json => { data.durability = json; loading.durability = false; });
@@ -242,7 +282,7 @@ let app = {
       }
       // if (search.text.length > 0) searchItems(search.text);
     }, { debounce: 500, immediate: true });
-    loading.any = computed(() => loading.language || loading.variants || loading.durability
+    loading.any = computed(() => loading.language || loading.variants || loading.fabric || loading.durability
       || loading.stack || loading.wrappingPaper);
 
     watch(() => [pref.value.showToast, Math.ceil(selected.value.items.length / pref.value.item.splitBy),
