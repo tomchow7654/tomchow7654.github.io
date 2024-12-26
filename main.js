@@ -49,7 +49,7 @@ let useHexUtil = ({ data, pref, selected }) => {
             max: data.durability[toolIndex].durability
           };
 
-          if (data.variants.internal_names.includes(r.internal_name)) {
+          if (r.internal_name in data.variants.internal_names) {
             r.variants = data.variants.data.reduce((arr, v) => {
               if (v.id == r.internal_name) {
                 v.variant_id_trimmed = v.variant_id.slice(v.variant_id.lastIndexOf("_") + 1);
@@ -62,6 +62,11 @@ let useHexUtil = ({ data, pref, selected }) => {
         r.wrappingPaper = Object.assign({}, pref.value.wrappingPaper);
         return r;
       });
+    },
+    variantTitle(item) {
+      if (item.internal_name in data.variants.internal_names)
+        return data.variants.internal_names[item.internal_name][pref.value.language];
+      else return "";
     },
     nhi: {
       import(e) {
@@ -152,30 +157,30 @@ let app = {
       copyUtil = useCopyUtil();
     Object.assign(data, {
       translation: {},
-      variants: { data: [], internal_names: [] },
+      variants: { data: [], internal_names: {} },
       stack: {},
       durability: [],
       wrappingPaper: [],
     });
     let fetchJSON = async path => await fetch(path).then(resp => resp.json());
 
-    // https://gitlab.com/AeonSake2/acnh-translations
-    // acnh-translations / JSON / String / Remake
-    // JSON/String/Remake/STR_Remake_BodyParts.msbt.json <- title
-    // JSON/String/Remake/STR_Remake_BodyColor.msbt.json <- color
-    fetchJSON("./acnh-translations/JSON/String/Remake/STR_Remake_BodyColor.msbt.json").then(json => {
+    // fetch item variant title (STR_Remake_BodyParts) & color (STR_Remake_BodyColor)
+    Promise.all([
+      fetchJSON("./acnh-translations/JSON/String/Remake/STR_Remake_BodyParts.msbt.json"),
+      fetchJSON("./acnh-translations/JSON/String/Remake/STR_Remake_BodyColor.msbt.json")
+    ]).then(([titleJson, colorJson]) => {
       // transform json
-      let transformed = json.map(item => ({
+      let transformed = colorJson.map(item => ({
         id: item.label.slice(0, item.label.lastIndexOf("_")),
         variant_id: item.label,
         locale: item.locale
       }));
 
       data.variants.data = transformed;
-      data.variants.internal_names = transformed.reduce((arr, r) => {
-        if (!arr.includes(r.id)) arr.push(r.id);
-        return arr;
-      }, []);
+      data.variants.internal_names = titleJson.reduce((obj, { label, locale }) => {
+        obj[label] = locale;
+        return obj;
+      }, {});
       loading.variants = false;
     });
 

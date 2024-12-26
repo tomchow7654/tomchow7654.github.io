@@ -287,7 +287,7 @@
             <div v-if="search.text.length > 0 && search.moreThan100" class="alert alert-warning" role="alert">
               Only showing the first 100 results.
             </div>
-            <div id="search-result" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
+            <div id="search-result" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xxl-4">
               <template v-for="(r, index) in search.result">
                 <div class="col">
                   <div class="card border-primary mb-3" style="height: calc(100% - 1rem)">
@@ -389,6 +389,7 @@
                               </button>
                             </li>
                             <template v-else>
+                              <li><h6 class="dropdown-header">{{ variantTitle(r) }}</h6></li>
                               <li v-for="v in r.variants" class="dropdown-item-text d-flex" aria-current="true">
                                 <div class="flex-grow-1">
                                   <h5 class="mb-1">{{ v.locale[pref.language] }}</h5>
