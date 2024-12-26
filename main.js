@@ -54,23 +54,11 @@ let useHexUtil = ({ data, pref, selected }) => {
             max: data.durability[toolIndex].durability
           };
 
-          if (r.internal_name in data.variants.internal_names) {
-            r.variants = data.variants.data.reduce((arr, variant) => {
-              if (variant.id == r.internal_name) {
-                variant.variant_id_trimmed = variant.variant_id.slice(variant.variant_id.lastIndexOf("_") + 1);
-                arr.push(variant);
-              }
-              return arr;
-            }, []);
-          }
+          if (r.internal_name in data.variants.internal_names)
+            r.variants = data.variants.data.filter(variant => variant.id == r.internal_name);
+
           if (r.internal_name in data.fabric.internal_names) {
-            r.fabric = data.fabric.data.reduce((arr, fabric) => {
-              if (fabric.id == r.internal_name) {
-                fabric.fabric_id_trimmed = fabric.id.slice(fabric.fabric_id.lastIndexOf("_") + 1);
-                arr.push(fabric);
-              }
-              return arr;
-            }, []);
+            r.fabric = data.fabric.data.filter(fabric => fabric.id == r.internal_name);
             r.fabricSelected = -1;
           }
         }
@@ -193,6 +181,7 @@ let app = {
       // transform json
       let transformed = colorJson.map(item => ({
         id: item.label.slice(0, item.label.lastIndexOf("_")),
+        index: Number(item.label.slice(item.label.lastIndexOf("_") + 1)),
         variant_id: item.label,
         locale: item.locale
       }));
@@ -213,7 +202,8 @@ let app = {
       // transform json
       let transformed = colorJson.map(item => ({
         id: item.label.slice(0, item.label.lastIndexOf("_")),
-        variant_id: item.label,
+        index: Number(item.label.slice(item.label.lastIndexOf("_") + 1)),
+        fabric_id: item.label,
         locale: item.locale
       }));
 

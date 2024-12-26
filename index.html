@@ -322,46 +322,42 @@
                             <i class="bi-gift mx-1" aria-hidden="true" data-bs-toggle="tooltip" data-bs-placement="top"
                               title="Specify what to wrap with"></i>
                           </button>
-                          <div class="dropdown-menu p-4 text-body-secondary"
-                            aria-labelledby="variant selector button group"
+                          <div class="dropdown-menu py-2" aria-labelledby="variant selector button group"
                             style="width: max-content; min-width: 300px;">
                             <template v-if="!!r.variants">
                               <h5 class="dropdown-header">{{ variantTitle(r) }}</h5>
-                              <ul class="list-group list-group-flush mb-3">
+                              <ul class="list-group list-group-flush">
                                 <li v-for="v in r.variants" class="list-group-item d-flex" aria-current="true">
                                   <div class="flex-grow-1">
                                     <h5 class="mb-1">{{ v.locale[pref.language] }}</h5>
-                                    <p class="mb-1">{{ trimItemId(calculateItemId(r, {variantId:
-                                      v.variant_id_trimmed}),
-                                      true)
-                                      }}</p>
+                                    <p class="mb-0">{{ trimItemId(calculateItemId(r, {variantId: v.index}), true) }}</p>
                                   </div>
                                   <div class="btn-group btn-group-lg ms-2" role="group"
                                     aria-label="variant selector button group">
                                     <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r, {variantId: 
-                                      v.variant_id_trimmed})) ? 'btn-success': 'btn-outline-info']" @click="copy(trimItemId(
-                                      calculateItemId(r, {variantId: v.variant_id_trimmed})))">
-                                      <i :class="[copyText == trimItemId(calculateItemId(r, {variantId: v.variant_id_trimmed})) ? 
+                                      v.index})) ? 'btn-success': 'btn-outline-info']" @click="copy(trimItemId(
+                                      calculateItemId(r, {variantId: v.index})))">
+                                      <i :class="[copyText == trimItemId(calculateItemId(r, {variantId: v.index})) ? 
                                         'bi-check' : 'bi-clipboard']" aria-hidden="true"></i>
                                     </button>
                                     <button type="button" class="btn btn-outline-info" @click="selection.add(r, 
-                                    {variantId: v.variant_id_trimmed})">
+                                    {variantId: v.index})">
                                       <i class="bi-plus" aria-hidden="true"></i>
                                     </button>
                                   </div>
                                 </li>
                               </ul>
-                              <div class="dropdown-divider"></div>
+                              <div class="dropdown-divider mt-0 mb-3"></div>
                             </template>
-                            <template>
-                              <ul class="list-group list-group-flush mb-3">
-                                <li v-if="!!r.fabric" class="list-group-item mb-3">
+                            <template v-if="!!r.fabric">
+                              <ul class="list-group list-group-flush">
+                                <li class="list-group-item mb-3">
                                   <label :for="r.internal_name + '-select-fabric'"
                                     class="form-label underline-first-letter dropdown-header ps-0">{{
                                     fabricTitle(r) }}</label>
                                   <select v-model="r.fabricSelected" :id="r.internal_name + '-select-fabric'"
                                     class="form-select text-capitalize" :aria-label="'Select ' + fabricTitle(r)">
-                                    <option v-for="fabric in r.fabric" :value="fabric.fabric_id_trimmed">
+                                    <option v-for="fabric in r.fabric" :value="fabric.index">
                                       {{ fabric.locale[pref.language] }}
                                     </option>
                                   </select>
@@ -418,7 +414,7 @@
                                 </div>
                               </li>
                             </ul>
-                            <div class="dropdown-divider"></div>
+                            <div v-if="!r.variants" class="dropdown-divider mt-0 mb-3"></div>
                             <div v-if="!r.variants" class="dropdown-item-text btn-group btn-group-lg ms-2" role="group"
                               aria-label="variant selector button group">
                               <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r)) ? 'btn-success': 
