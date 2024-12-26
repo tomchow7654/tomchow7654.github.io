@@ -11,7 +11,7 @@ let useHexUtil = ({ data, pref, selected }) => {
     },
     calculateItemId(item, opt = {}) {
       let variantId = (opt && opt.variantId) ? Number(opt.variantId) : -1,
-        fabricId = item.fabricSelected ? Number(item.fabricSelected) : -1,
+        fabricId = item.fabricSelected ? Number(item.fabricSelected) : 0,
         isDiy = (opt && opt.isDiy) ? opt.isDiy : false,
         command = (opt && opt.command) ? opt.command : "diy";
       if (isDiy && command == "diy") return [item.DiyRecipe[1]];
@@ -25,7 +25,7 @@ let useHexUtil = ({ data, pref, selected }) => {
 
       let bCount = 0;
       if (variantId != -1) bCount += variantId;
-      if (fabricId != -1) bCount += (fabricId * 32);
+      if (fabricId != 0) bCount += (fabricId * 32);
       if (bCount > 0) b = (bCount).toString(16).toUpperCase().padStart(4, "0");
 
       if (item.wrappingPaper.color.length > 0 && !!data.wrappingPaper) {
@@ -59,7 +59,7 @@ let useHexUtil = ({ data, pref, selected }) => {
 
           if (r.internal_name in data.fabric.internal_names) {
             r.fabric = data.fabric.data.filter(fabric => fabric.id == r.internal_name);
-            r.fabricSelected = -1;
+            r.fabricSelected = 0;
           }
         }
         r.wrappingPaper = Object.assign({}, pref.value.wrappingPaper);
@@ -390,6 +390,31 @@ let app = {
       localStorage.setItem("search-cache", JSON.stringify(to));
     }, { throttle: 500, deep: true });
 
+    let importItems = () => {
+      let list = prompt("Please enter list of items", "1x " + data.translation.TWzh.byName.entries().next().value[1]);
+      if (list == null) return;
+      list.split("\n").forEach(item => {
+        let [count, name] = item.trim().split("x "), variant = "";
+        count = Number(count);
+        if (count == 0) return;
+        // remove last bracket () or （）
+        if ([")", "）"].includes(name[name.length - 1])) {
+          let lastOpen = name.split("").findLastIndex(char => ["(", "（"].includes(char));
+          name = name.slice(0, lastOpen - 1) + name.slice(lastOpen + 1);
+          variant = name.slice(lastOpen - 1, name.length - 1).trim();
+        }
+        let { result } = search.byName(name);
+        if (result.length == 0) return;
+        let internal_name = result[0].internal_name, ids;
+        if (variant.length > 0) {
+          let variantId = data.variants.data.find(x => x.id == internal_name && x.locale[pref.value.language] == variant).index;
+          ids = hexUtil.calculateItemId(result[0], { variantId });
+        } else ids = hexUtil.calculateItemId(result[0]);
+        if (!ids) return;
+        for (let i = 0; i < count; i++) selection.addHex(ids);
+      });
+    };
+
     const title = computed(() => {
       let titles = {
         default: 'ACNH item id lookup',
@@ -432,7 +457,7 @@ let app = {
     });
     const altState = useKeyModifier("Alt");
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-    return { title, loading, search, selected, selection, pref, data, languages, ...hexUtil, ...copyUtil, altState, scrollToTop };
+    return { title, loading, search, selected, selection, pref, data, languages, ...hexUtil, ...copyUtil, altState, importItems, scrollToTop };
   },
 };
 Vue.createApp(app).mount('#app');
