@@ -322,58 +322,105 @@
                             <i class="bi-gift mx-1" aria-hidden="true" data-bs-toggle="tooltip" data-bs-placement="top"
                               title="Specify what to wrap with"></i>
                           </button>
-                          <ul class=" dropdown-menu" aria-labelledby="variant selector button group"
+                          <div class="dropdown-menu p-4 text-body-secondary"
+                            aria-labelledby="variant selector button group"
                             style="width: max-content; min-width: 300px;">
-                            <li v-if="!!r.stack" class="dropdown-item-text mb-3">
-                              <div class="d-flex align-items-center">
-                                <label :for="r.internal_name + '-item-count'"
-                                  class="form-label mb-0 me-2 underline-first-letter">Count</label>
-                                <input v-model="r.stack.current" :id="r.internal_name + '-item-count'" type="number"
-                                  class="form-control form-control-sm ms-2" min="1" :max="r.stack.max" step="1"
-                                  size="2">
-                              </div>
-                              <input v-model="r.stack.current" type="range" class="form-range" min="1"
-                                :max="r.stack.max" step="1">
-                            </li>
-                            <li v-if="!!r.durability" class="dropdown-item-text mb-3">
-                              <div class="d-flex align-items-center">
-                                <label :for="r.internal_name + '-item-count'"
-                                  class="form-label mb-0 me-2 underline-first-letter">Durability</label>
-                                <input v-model="r.durability.current" :id="r.internal_name + '-item-count'"
-                                  type="number" class="form-control form-control-sm ms-2" min="1"
-                                  :max="r.durability.max" step="1" size="3">
-                              </div>
-                              <input v-model="r.durability.current" type="range" class="form-range" min="1"
-                                :max="r.durability.max" step="1">
-                            </li>
-                            <li class="dropdown-item-text mb-3">
-                              <label :for="r.internal_name + '-select-wrapping-paper'"
-                                class="form-label d-flex justify-content-between underline-first-letter">
-                                <span>Wrapping Paper</span>
-                                <img v-if="r.wrappingPaper.color.length > 0" :src="data.getBagPicture(r)"
-                                  class="icon" />
-                              </label>
-                              <select v-model="r.wrappingPaper.color" :id="r.internal_name + '-select-wrapping-paper'"
-                                class="form-select text-capitalize" aria-label="Select wrapping paper">
-                                <option selected value="">None</option>
-                                <option v-for="option in data.wrappingPaper" :value="option.color">
-                                  {{ data.getWrappingPaperName(option.internal_name) }}
-                                </option>
-                              </select>
-                            </li>
-
-                            <li v-if="r.wrappingPaper.color.length > 0" class="dropdown-item-text mb-3">
-                              <div class="form-check">
-                                <input v-model="r.wrappingPaper.withName" class="form-check-input" type="checkbox"
-                                  :id="r.internal_name + '-wrapping-paper-with-name'">
-                                <label class="form-check-label" :for="r.internal_name + '-wrapping-paper-with-name'">
-                                  With Name
+                            <template v-if="!!r.variants">
+                              <h5 class="dropdown-header">{{ variantTitle(r) }}</h5>
+                              <ul class="list-group list-group-flush mb-3">
+                                <li v-for="v in r.variants" class="list-group-item d-flex" aria-current="true">
+                                  <div class="flex-grow-1">
+                                    <h5 class="mb-1">{{ v.locale[pref.language] }}</h5>
+                                    <p class="mb-1">{{ trimItemId(calculateItemId(r, {variantId:
+                                      v.variant_id_trimmed}),
+                                      true)
+                                      }}</p>
+                                  </div>
+                                  <div class="btn-group btn-group-lg ms-2" role="group"
+                                    aria-label="variant selector button group">
+                                    <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r, {variantId: 
+                                      v.variant_id_trimmed})) ? 'btn-success': 'btn-outline-info']" @click="copy(trimItemId(
+                                      calculateItemId(r, {variantId: v.variant_id_trimmed})))">
+                                      <i :class="[copyText == trimItemId(calculateItemId(r, {variantId: v.variant_id_trimmed})) ? 
+                                        'bi-check' : 'bi-clipboard']" aria-hidden="true"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-info" @click="selection.add(r, 
+                                    {variantId: v.variant_id_trimmed})">
+                                      <i class="bi-plus" aria-hidden="true"></i>
+                                    </button>
+                                  </div>
+                                </li>
+                              </ul>
+                              <div class="dropdown-divider"></div>
+                            </template>
+                            <template>
+                              <ul class="list-group list-group-flush mb-3">
+                                <li v-if="!!r.fabric" class="list-group-item mb-3">
+                                  <label :for="r.internal_name + '-select-fabric'"
+                                    class="form-label underline-first-letter dropdown-header ps-0">{{
+                                    fabricTitle(r) }}</label>
+                                  <select v-model="r.fabricSelected" :id="r.internal_name + '-select-fabric'"
+                                    class="form-select text-capitalize" :aria-label="'Select ' + fabricTitle(r)">
+                                    <option v-for="fabric in r.fabric" :value="fabric.fabric_id_trimmed">
+                                      {{ fabric.locale[pref.language] }}
+                                    </option>
+                                  </select>
+                                </li>
+                              </ul>
+                            </template>
+                            <h5 class="dropdown-header">Miscellaneous</h5>
+                            <ul class="list-group list-group-flush">
+                              <li v-if="!!r.stack" class="list-group-item mb-3">
+                                <div class="d-flex align-items-center">
+                                  <label :for="r.internal_name + '-item-count'"
+                                    class="form-label mb-0 me-2 underline-first-letter">Count</label>
+                                  <input v-model="r.stack.current" :id="r.internal_name + '-item-count'" type="number"
+                                    class="form-control form-control-sm ms-2" min="1" :max="r.stack.max" step="1"
+                                    size="2">
+                                </div>
+                                <input v-model="r.stack.current" type="range" class="form-range" min="1"
+                                  :max="r.stack.max" step="1">
+                              </li>
+                              <li v-if="!!r.durability" class="list-group-item mb-3">
+                                <div class="d-flex align-items-center">
+                                  <label :for="r.internal_name + '-item-count'"
+                                    class="form-label mb-0 me-2 underline-first-letter">Durability</label>
+                                  <input v-model="r.durability.current" :id="r.internal_name + '-item-count'"
+                                    type="number" class="form-control form-control-sm ms-2" min="1"
+                                    :max="r.durability.max" step="1" size="3">
+                                </div>
+                                <input v-model="r.durability.current" type="range" class="form-range" min="1"
+                                  :max="r.durability.max" step="1">
+                              </li>
+                              <li class="list-group-item mb-3">
+                                <label :for="r.internal_name + '-select-wrapping-paper'"
+                                  class="form-label d-flex justify-content-between underline-first-letter">
+                                  <span>Wrapping Paper</span>
+                                  <img v-if="r.wrappingPaper.color.length > 0" :src="data.getBagPicture(r)"
+                                    class="icon" />
                                 </label>
-                              </div>
-                            </li>
+                                <select v-model="r.wrappingPaper.color" :id="r.internal_name + '-select-wrapping-paper'"
+                                  class="form-select text-capitalize" aria-label="Select wrapping paper">
+                                  <option selected value="">None</option>
+                                  <option v-for="option in data.wrappingPaper" :value="option.color">
+                                    {{ data.getWrappingPaperName(option.internal_name) }}
+                                  </option>
+                                </select>
+                              </li>
 
-                            <li v-if="!r.variants && !r.fabric" class="dropdown-item-text btn-group btn-group-lg ms-2"
-                              role="group" aria-label="variant selector button group">
+                              <li v-if="r.wrappingPaper.color.length > 0" class="list-group-item mb-3">
+                                <div class="form-check">
+                                  <input v-model="r.wrappingPaper.withName" class="form-check-input" type="checkbox"
+                                    :id="r.internal_name + '-wrapping-paper-with-name'">
+                                  <label class="form-check-label" :for="r.internal_name + '-wrapping-paper-with-name'">
+                                    With Name
+                                  </label>
+                                </div>
+                              </li>
+                            </ul>
+                            <div class="dropdown-divider"></div>
+                            <div v-if="!r.variants" class="dropdown-item-text btn-group btn-group-lg ms-2" role="group"
+                              aria-label="variant selector button group">
                               <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r)) ? 'btn-success': 
                             'btn-outline-info']" @click="copy(trimItemId(calculateItemId(r)))">
                                 <i :class="[copyText == trimItemId(calculateItemId(r)) ? 'bi-check' : 'bi-clipboard']"
@@ -386,63 +433,8 @@
                                 @click="selection.add(r,{multiple: true})">
                                 <i class="bi-plus-square-fill" aria-hidden="true"></i>
                               </button>
-                            </li>
-                            <template v-else>
-                              <template v-if="!!r.variants">
-                                <li>
-                                  <h6 class="dropdown-header">{{ variantTitle(r) }}</h6>
-                                </li>
-                                <li v-for="v in r.variants" class="dropdown-item-text d-flex" aria-current="true">
-                                  <div class="flex-grow-1">
-                                    <h5 class="mb-1">{{ v.locale[pref.language] }}</h5>
-                                    <p class="mb-1">{{ trimItemId(calculateItemId(r, {variantId: v.variant_id_trimmed}),
-                                      true)
-                                      }}</p>
-                                  </div>
-                                  <div class="btn-group btn-group-lg ms-2" role="group"
-                                    aria-label="variant selector button group">
-                                    <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r, {variantId: 
-                                v.variant_id_trimmed})) ? 'btn-success': 'btn-outline-info']" @click="copy(trimItemId(
-                                calculateItemId(r, {variantId: v.variant_id_trimmed})))">
-                                      <i :class="[copyText == trimItemId(calculateItemId(r, {variantId: v.variant_id_trimmed})) ? 
-                                  'bi-check' : 'bi-clipboard']" aria-hidden="true"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-outline-info" @click="selection.add(r, 
-                              {variantId: v.variant_id_trimmed})">
-                                      <i class="bi-plus" aria-hidden="true"></i>
-                                    </button>
-                                  </div>
-                                </li>
-                              </template>
-                              <template v-if="!!r.fabric">
-                                <li>
-                                  <h6 class="dropdown-header">{{ fabricTitle(r) }}</h6>
-                                </li>
-                                <li v-for="v in r.fabric" class="dropdown-item-text d-flex" aria-current="true">
-                                  <div class="flex-grow-1">
-                                    <h5 class="mb-1">{{ v.locale[pref.language] }}</h5>
-                                    <p class="mb-1">{{ trimItemId(calculateItemId(r, {fabricId: v.fabric_id_trimmed}),
-                                      true)
-                                      }}</p>
-                                  </div>
-                                  <div class="btn-group btn-group-lg ms-2" role="group"
-                                    aria-label="variant selector button group">
-                                    <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r, {fabricId: 
-                                v.variant_id_trimmed})) ? 'btn-success': 'btn-outline-info']" @click="copy(trimItemId(
-                                calculateItemId(r, {fabricId: v.variant_id_trimmed})))">
-                                      <i :class="[copyText == trimItemId(calculateItemId(r, {fabricId: v.variant_id_trimmed})) ? 
-                                  'bi-check' : 'bi-clipboard']" aria-hidden="true"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-outline-info" @click="selection.add(r, 
-                              {fabricId: v.variant_id_trimmed})">
-                                      <i class="bi-plus" aria-hidden="true"></i>
-                                    </button>
-                                  </div>
-                                </li>
-
-                              </template>
-                            </template>
-                          </ul>
+                            </div>
+                          </div>
                         </li>
                       </ul>
                     </div>
@@ -496,7 +488,8 @@
                                 <input v-model="pref.item.diySeparateCmd" class="form-check-input" type="checkbox"
                                   :id="'diy-separate-cmd-for-item-'+ r.internal_name">
                                 <label class="form-check-label"
-                                  :for="'diy-separate-cmd-for-item-' + r.internal_name">Add DIYs to separate
+                                  :for="'diy-separate-cmd-for-item-' + r.internal_name">Add DIYs to
+                                  separate
                                   command</label>
                               </div>
                               <span class="mt-2 text-secondary">Will use command:

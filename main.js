@@ -11,7 +11,7 @@ let useHexUtil = ({ data, pref, selected }) => {
     },
     calculateItemId(item, opt = {}) {
       let variantId = (opt && opt.variantId) ? Number(opt.variantId) : -1,
-        fabricId = (opt && opt.fabricId) ? Number(opt.fabricId) : -1,
+        fabricId = item.fabricSelected ? Number(item.fabricSelected) : -1,
         isDiy = (opt && opt.isDiy) ? opt.isDiy : false,
         command = (opt && opt.command) ? opt.command : "diy";
       if (isDiy && command == "diy") return [item.DiyRecipe[1]];
@@ -55,22 +55,23 @@ let useHexUtil = ({ data, pref, selected }) => {
           };
 
           if (r.internal_name in data.variants.internal_names) {
-            r.variants = data.variants.data.reduce((arr, v) => {
-              if (v.id == r.internal_name) {
-                v.variant_id_trimmed = v.variant_id.slice(v.variant_id.lastIndexOf("_") + 1);
-                arr.push(v);
+            r.variants = data.variants.data.reduce((arr, variant) => {
+              if (variant.id == r.internal_name) {
+                variant.variant_id_trimmed = variant.variant_id.slice(variant.variant_id.lastIndexOf("_") + 1);
+                arr.push(variant);
               }
               return arr;
             }, []);
           }
           if (r.internal_name in data.fabric.internal_names) {
-            r.fabric = data.fabric.data.reduce((arr, v) => {
-              if (v.id == r.internal_name) {
-                v.fabric_id_trimmed = v.fabric_id.slice(v.fabric_id.lastIndexOf("_") + 1);
-                arr.push(v);
+            r.fabric = data.fabric.data.reduce((arr, fabric) => {
+              if (fabric.id == r.internal_name) {
+                fabric.fabric_id_trimmed = fabric.id.slice(fabric.fabric_id.lastIndexOf("_") + 1);
+                arr.push(fabric);
               }
               return arr;
             }, []);
+            r.fabricSelected = -1;
           }
         }
         r.wrappingPaper = Object.assign({}, pref.value.wrappingPaper);
