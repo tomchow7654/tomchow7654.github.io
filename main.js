@@ -25,7 +25,7 @@ let useHexUtil = ({ data, pref, selected }) => {
 
       if (item.wrappingPaper.color.length > 0 && !!data.wrappingPaper) {
         let color = data.wrappingPaper.find(paper => paper.color == item.wrappingPaper.color);
-        if (color) c = item.wrappingPaper.withName ? color.withName : color.hex;
+        if (color) c = (item.wrappingPaper.withName ? color.withName : color.hex).padStart(4, "0");
       }
       return [a, b, c, d];
     },
