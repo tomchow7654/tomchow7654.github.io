@@ -158,14 +158,36 @@ let app = {
       wrappingPaper: [],
     });
     let fetchJSON = async path => await fetch(path).then(resp => resp.json());
-    fetchJSON("./translation-sheet-data/variants.json").then(json => {
-      data.variants.data = json;
-      data.variants.internal_names = json.reduce((arr, r) => {
+
+    // fetchJSON("./translation-sheet-data/variants.json").then(json => {
+    //   data.variants.data = json;
+    //   data.variants.internal_names = json.reduce((arr, r) => {
+    //     if (!arr.includes(r.id)) arr.push(r.id);
+    //     return arr;
+    //   }, []);
+    //   loading.variants = false;
+    // });
+
+    // https://gitlab.com/AeonSake2/acnh-translations
+    // acnh-translations / JSON / String / Remake
+    // JSON/String/Remake/STR_Remake_BodyParts.msbt.json <- title
+    // JSON/String/Remake/STR_Remake_BodyColor.msbt.json <- color
+    fetchJSON("./acnh-translations/JSON/String/Remake/STR_Remake_BodyColor.msbt.json").then(json => {
+      // transform json
+      let transformed = json.map(item => ({
+        id: item.label.slice(0, item.label.lastIndexOf("_")),
+        variant_id: item.label,
+        locale: item.locale
+      }));
+
+      data.variants.data = transformed;
+      data.variants.internal_names = transformed.reduce((arr, r) => {
         if (!arr.includes(r.id)) arr.push(r.id);
         return arr;
       }, []);
       loading.variants = false;
     });
+
     fetchJSON("./data/durability.json").then(json => { data.durability = json; loading.durability = false; });
     fetchJSON("./data/stack.json").then(json => { data.stack = json; loading.stack = false; });
     fetchJSON("./data/wrapping paper.json").then(json => { data.wrappingPaper = json; loading.wrappingPaper = false; });

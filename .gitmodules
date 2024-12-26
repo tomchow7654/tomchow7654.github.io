@@ -4,3 +4,6 @@
 [submodule "translation-sheet-data"]
 	path = translation-sheet-data
 	url = https://github.com/alexislours/translation-sheet-data.git
+[submodule "acnh-translations"]
+	path = acnh-translations
+	url = https://gitlab.com/AeonSake2/acnh-translations.git
