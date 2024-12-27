@@ -8,8 +8,8 @@
   <title>ACNH item id lookup (Multi-language)</title>
 
   <!-- Bootstrap core CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
   <style>
@@ -39,14 +39,21 @@
     <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
       <span class="navbar-brand col-md-3 col-lg-2 me-0 px-3">{{ title }}</span>
       <div class="navbar-nav flex-row">
-        <button class="btn btn-dark" @click="scrollToTop">
+        <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Import from list">
+          <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#importModal">
+            <i class="bi-plus-lg" aria-hidden="true"></i>
+          </button>
+        </span>
+        <button class="btn btn-dark" @click="scrollToTop" data-bs-toggle="tooltip" data-bs-placement="bottom"
+          title="Back to top">
           <i class="bi-chevron-up" aria-hidden="true"></i>
         </button>
-        <button class="navbar-toggler d-md-none collapsed" type="button" data-bs-toggle="collapse"
-          data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
-          aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
+        <span class="d-md-none" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Toggle side menu">
+          <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu"
+            aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </span>
       </div>
     </header>
 
@@ -60,68 +67,74 @@
 
             <div class="px-3 mb-3 border-bottom" v-if="!loading.any">
               <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
-                <span>Selected <template v-if="selected.items.length+selected.diys.length > 0">
+                <button class="btn p-0 text-muted text-uppercase" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#selectedCollapse" aria-expanded="false" aria-controls="selectedCollapse">
+                  Selected <template v-if="selected.items.length+selected.diys.length > 0">
                     ({{selected.items.length + selected.diys.length }})
                   </template>
-                </span>
+                </button>
                 <button class="ms-2 btn btn-sm" @click="selected.items = []; selected.diys = [];"
                   aria-label="Clear selected">
                   <i class="bi-x" aria-hidden="true"></i>
                 </button>
               </h6>
-
-              <ul class="list-group list-group-flush">
-                <li v-for="index in Math.ceil(selected.items.length / pref.item.splitBy)" style="background: inherit;"
-                  class="list-group-item px-0">
-                  <div class="d-flex justify-content-between align-items-start">
-                    <input v-model="pref.item.itemPrefix" type="text" style="max-width: 100%;"
-                      class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
-                    <button class="ms-2 btn" @click="copy(pref.item.itemPrefix + ' ' + selection.join(selection.splited.items[index - 1])); 
+              <div id="selectedCollapse" class="collapse show">
+                <ul class="list-group list-group-flush">
+                  <li v-for="index in Math.ceil(selected.items.length / pref.item.splitBy)" style="background: inherit;"
+                    class="list-group-item px-0">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <input v-model="pref.item.itemPrefix" type="text" style="max-width: 100%;"
+                        class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
+                      <button class="ms-2 btn" @click="copy(pref.item.itemPrefix + ' ' + selection.join(selection.splited.items[index - 1])); 
                   selected.items.splice((index - 1) * pref.item.splitBy, pref.item.splitBy);">
-                      <i class="bi-clipboard" aria-hidden="true"></i>
-                    </button>
-                  </div>
-                  <span class="mx-1">{{ selection.join(selection.splited.items[index-1]) }}</span>
-                </li>
+                        <i class="bi-clipboard" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                    <span class="mx-1">{{ selection.join(selection.splited.items[index-1]) }}</span>
+                  </li>
 
-                <li v-for="index in Math.ceil(selected.diys.length / pref.item.splitBy)" style="background: inherit;"
-                  class="list-group-item px-0">
-                  <div class="d-flex justify-content-between align-items-start">
-                    <input v-model="pref.item.diyPrefix" type="text" style="max-width: 100%;"
-                      class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
-                    <button class="ms-2 btn" @click="copy(pref.item.diyPrefix + ' ' + selection.splited.diys[index - 1].join(' ')); 
+                  <li v-for="index in Math.ceil(selected.diys.length / pref.item.splitBy)" style="background: inherit;"
+                    class="list-group-item px-0">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <input v-model="pref.item.diyPrefix" type="text" style="max-width: 100%;"
+                        class="form-control form-control-sm transparent-textbox w-100" placeholder="Items:">
+                      <button class="ms-2 btn" @click="copy(pref.item.diyPrefix + ' ' + selection.splited.diys[index - 1].join(' ')); 
                   selected.diys.splice((index - 1) * pref.item.splitBy, pref.item.splitBy);">
-                      <i class="bi-clipboard" aria-hidden="true"></i>
-                    </button>
-                  </div>
-                  <span class="mx-1">{{ selection.splited.diys[index-1].join(" ") }}</span>
-                </li>
-              </ul>
-              <div class="d-flex gap-2 justify-content-center mb-2">
-                <button type="button" class="btn btn-outline-primary" @click="selection.undo"
-                  :disabled="!selection.canUndo">
-                  <i class="bi bi-arrow-counterclockwise me-2" aria-hidden="true"></i>Undo
-                </button>
-                <button type="button" class="btn btn-outline-primary" @click="selection.redo"
-                  :disabled="!selection.canRedo">
-                  <i class="bi bi-arrow-clockwise me-2" aria-hidden="true"></i>Redo
-                </button>
-              </div>
-              <div class="d-grid gap-2 mb-2" v-if="selected.items.length > 0">
-                <button type="button" class="btn btn-outline-success" @click="nhi.export">
-                  <i class="bi-file-earmark-arrow-down me-2" aria-hidden="true"></i> Save current inventory
-                </button>
+                        <i class="bi-clipboard" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                    <span class="mx-1">{{ selection.splited.diys[index-1].join(" ") }}</span>
+                  </li>
+                </ul>
+                <div class="d-flex gap-2 justify-content-center mb-2">
+                  <button type="button" class="btn btn-outline-primary" @click="selection.undo"
+                    :disabled="!selection.canUndo">
+                    <i class="bi bi-arrow-counterclockwise me-2" aria-hidden="true"></i>Undo
+                  </button>
+                  <button type="button" class="btn btn-outline-primary" @click="selection.redo"
+                    :disabled="!selection.canRedo">
+                    <i class="bi bi-arrow-clockwise me-2" aria-hidden="true"></i>Redo
+                  </button>
+                </div>
+                <div class="d-grid gap-2 mb-2" v-if="selected.items.length > 0">
+                  <button type="button" class="btn btn-outline-success" @click="nhi.export">
+                    <i class="bi-file-earmark-arrow-down me-2" aria-hidden="true"></i> Save current inventory
+                  </button>
+                </div>
               </div>
             </div>
 
             <div class="px-3 mb-3 border-bottom" v-if="!loading.any && selection.history.length > 0">
               <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
-                <span>History</span>
+                <button class="btn p-0 text-muted text-uppercase" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#historyCollapse" aria-expanded="false" aria-controls="historyCollapse">
+                  History
+                </button>
                 <button class="ms-2 btn btn-sm" @click="selection.history.splice(0)" aria-label="Clear history">
                   <i class="bi-x" aria-hidden="true"></i>
                 </button>
               </h6>
-              <ul class="list-group list-group-flush">
+              <ul id="historyCollapse" class="list-group list-group-flush collapse show">
                 <li v-for="(ids, i) in selection.history" style="background: inherit;"
                   class="list-group-item px-0 d-flex justify-content-between align-items-center">
                   <span class="mx-1 text-truncate">
@@ -137,10 +150,13 @@
 
             <div class="px-3 mb-3 border-bottom">
               <h6 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted">
-                <span>Preferences</span>
+                <button class="btn p-0 text-muted text-uppercase" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#prefCollapse" aria-expanded="false" aria-controls="prefCollapse">
+                  Preferences
+                </button>
               </h6>
 
-              <ul class="nav flex-column mb-2">
+              <ul id="prefCollapse" class="nav flex-column mb-2 collapse show">
                 <li class="nav-item my-2 form-check form-switch">
                   <input v-model="pref.showToast" class="form-check-input" type="checkbox" id="show-toast">
                   <label class="form-check-label" for="show-toast">Show Toast</label>
@@ -323,112 +339,117 @@
                               title="Specify what to wrap with"></i>
                           </button>
                           <div class="dropdown-menu py-2" aria-labelledby="variant selector button group"
-                            style="width: max-content; min-width: 300px;">
-                            <template v-if="!!r.variants">
-                              <h5 class="dropdown-header">{{ variantTitle(r) }}</h5>
-                              <ul class="list-group list-group-flush">
-                                <li v-for="v in r.variants" class="list-group-item d-flex" aria-current="true">
-                                  <div class="flex-grow-1">
-                                    <h5 class="mb-1">{{ v.locale[pref.language] }}</h5>
-                                    <p class="mb-0">{{ trimItemId(calculateItemId(r, {variantId: v.index}), true) }}</p>
-                                  </div>
-                                  <div class="btn-group btn-group-lg ms-2" role="group"
-                                    aria-label="variant selector button group">
-                                    <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r, {variantId: 
-                                      v.index})) ? 'btn-success': 'btn-outline-info']" @click="copy(trimItemId(
-                                      calculateItemId(r, {variantId: v.index})))">
-                                      <i :class="[copyText == trimItemId(calculateItemId(r, {variantId: v.index})) ? 
-                                        'bi-check' : 'bi-clipboard']" aria-hidden="true"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-outline-info" @click="selection.add(r, 
-                                    {variantId: v.index})">
-                                      <i class="bi-plus" aria-hidden="true"></i>
-                                    </button>
-                                  </div>
-                                </li>
-                              </ul>
-                              <div class="dropdown-divider mt-0 mb-3"></div>
-                            </template>
-                            <template v-if="!!r.fabric">
-                              <ul class="list-group list-group-flush">
-                                <li class="list-group-item mb-3">
-                                  <label :for="r.internal_name + '-select-fabric'"
-                                    class="form-label dropdown-header ps-0">{{
-                                    fabricTitle(r) }}</label>
-                                  <select v-model="r.fabricSelected" :id="r.internal_name + '-select-fabric'"
-                                    class="form-select text-capitalize" :aria-label="'Select ' + fabricTitle(r)">
-                                    <option v-for="fabric in r.fabric" :value="fabric.index + ''">
-                                      {{ fabric.locale[pref.language] }}
-                                    </option>
-                                  </select>
-                                </li>
-                              </ul>
-                            </template>
-                            <h5 class="dropdown-header">Miscellaneous</h5>
-                            <ul class="list-group list-group-flush">
-                              <li v-if="!!r.stack" class="list-group-item mb-3">
-                                <div class="d-flex align-items-center">
-                                  <label :for="r.internal_name + '-item-count'"
-                                    class="form-label mb-0 me-2">Count</label>
-                                  <input v-model="r.stack.current" :id="r.internal_name + '-item-count'" type="number"
-                                    class="form-control form-control-sm ms-2" min="1" :max="r.stack.max" step="1"
-                                    size="2">
+                            :style="{width: 'max-content', minWidth: !!r.variants ? 'min(calc(100vw - 32px), 600px)' : 'min(calc(100vw - 32px), 300px)'}">
+                            <div :class="['row', 'row-cols-1', 'g-0', {'row-cols-md-2':!!r.variants}]">
+                              <div v-if="!!r.variants" class="col p-0">
+                                <h5 class="dropdown-header">{{ variantTitle(r) }}</h5>
+                                <ul class="list-group list-group-flush">
+                                  <li v-for="v in r.variants" class="list-group-item d-flex" aria-current="true">
+                                    <div class="flex-grow-1">
+                                      <h5 class="mb-1">{{ v.locale[pref.language] }}</h5>
+                                      <p class="mb-0">{{ trimItemId(calculateItemId(r, {variantId: v.index}), true) }}
+                                      </p>
+                                    </div>
+                                    <div class="btn-group btn-group-lg ms-2" role="group"
+                                      aria-label="variant selector button group">
+                                      <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r, {variantId:
+                                        v.index})) ? 'btn-success': 'btn-outline-info']" @click="copy(trimItemId(
+                                        calculateItemId(r, {variantId: v.index})))">
+                                        <i :class="[copyText == trimItemId(calculateItemId(r, {variantId: v.index})) ?
+                                          'bi-check' : 'bi-clipboard']" aria-hidden="true"></i>
+                                      </button>
+                                      <button type="button" class="btn btn-outline-info" @click="selection.add(r,
+                                      {variantId: v.index})">
+                                        <i class="bi-plus" aria-hidden="true"></i>
+                                      </button>
+                                    </div>
+                                  </li>
+                                </ul>
+                              </div>
+                              <div class="col p-0">
+                                <template v-if="!!r.fabric">
+                                  <ul class="list-group list-group-flush">
+                                    <li class="list-group-item mb-3">
+                                      <label :for="r.internal_name + '-select-fabric'"
+                                        class="form-label dropdown-header ps-0">{{
+                                        fabricTitle(r) }}</label>
+                                      <select v-model="r.fabricSelected" :id="r.internal_name + '-select-fabric'"
+                                        class="form-select text-capitalize" :aria-label="'Select ' + fabricTitle(r)">
+                                        <option v-for="fabric in r.fabric" :value="fabric.index + ''">
+                                          {{ fabric.locale[pref.language] }}
+                                        </option>
+                                      </select>
+                                    </li>
+                                  </ul>
+                                </template>
+                                <h5 class="dropdown-header">Miscellaneous</h5>
+                                <ul class="list-group list-group-flush">
+                                  <li v-if="!!r.stack" class="list-group-item mb-3">
+                                    <div class="d-flex align-items-center">
+                                      <label :for="r.internal_name + '-item-count'"
+                                        class="form-label mb-0 me-2">Count</label>
+                                      <input v-model="r.stack.current" :id="r.internal_name + '-item-count'"
+                                        type="number" class="form-control form-control-sm ms-2" min="1"
+                                        :max="r.stack.max" step="1" size="2">
+                                    </div>
+                                    <input v-model="r.stack.current" type="range" class="form-range" min="1"
+                                      :max="r.stack.max" step="1">
+                                  </li>
+                                  <li v-if="!!r.durability" class="list-group-item mb-3">
+                                    <div class="d-flex align-items-center">
+                                      <label :for="r.internal_name + '-item-count'"
+                                        class="form-label mb-0 me-2">Durability</label>
+                                      <input v-model="r.durability.current" :id="r.internal_name + '-item-count'"
+                                        type="number" class="form-control form-control-sm ms-2" min="1"
+                                        :max="r.durability.max" step="1" size="3">
+                                    </div>
+                                    <input v-model="r.durability.current" type="range" class="form-range" min="1"
+                                      :max="r.durability.max" step="1">
+                                  </li>
+                                  <li class="list-group-item mb-3">
+                                    <label :for="r.internal_name + '-select-wrapping-paper'"
+                                      class="form-label d-flex justify-content-between">
+                                      <span>Wrapping Paper</span>
+                                      <img v-if="r.wrappingPaper.color.length > 0" :src="data.getBagPicture(r)"
+                                        class="icon" />
+                                    </label>
+                                    <select v-model="r.wrappingPaper.color"
+                                      :id="r.internal_name + '-select-wrapping-paper'"
+                                      class="form-select text-capitalize" aria-label="Select wrapping paper">
+                                      <option selected value="">None</option>
+                                      <option v-for="option in data.wrappingPaper" :value="option.color">
+                                        {{ data.getWrappingPaperName(option.internal_name) }}
+                                      </option>
+                                    </select>
+                                  </li>
+                                  <li v-if="r.wrappingPaper.color.length > 0" class="list-group-item mb-3">
+                                    <div class="form-check">
+                                      <input v-model="r.wrappingPaper.withName" class="form-check-input" type="checkbox"
+                                        :id="r.internal_name + '-wrapping-paper-with-name'">
+                                      <label class="form-check-label"
+                                        :for="r.internal_name + '-wrapping-paper-with-name'">
+                                        With Name
+                                      </label>
+                                    </div>
+                                  </li>
+                                </ul>
+                                <div v-if="!r.variants" class="dropdown-divider mt-0 mb-3"></div>
+                                <div v-if="!r.variants" class="dropdown-item-text btn-group btn-group-lg ms-2"
+                                  role="group" aria-label="variant selector button group">
+                                  <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r)) ? 'btn-success':
+                              'btn-outline-info']" @click="copy(trimItemId(calculateItemId(r)))">
+                                    <i :class="[copyText == trimItemId(calculateItemId(r)) ? 'bi-check' : 'bi-clipboard']"
+                                      aria-hidden="true"></i>
+                                  </button>
+                                  <button type="button" class="btn btn-outline-info" @click="selection.add(r)">
+                                    <i class="bi-plus" aria-hidden="true"></i>
+                                  </button>
+                                  <button v-if="false" type="button" class="btn btn-outline-info"
+                                    @click="selection.add(r,{multiple: true})">
+                                    <i class="bi-plus-square-fill" aria-hidden="true"></i>
+                                  </button>
                                 </div>
-                                <input v-model="r.stack.current" type="range" class="form-range" min="1"
-                                  :max="r.stack.max" step="1">
-                              </li>
-                              <li v-if="!!r.durability" class="list-group-item mb-3">
-                                <div class="d-flex align-items-center">
-                                  <label :for="r.internal_name + '-item-count'"
-                                    class="form-label mb-0 me-2">Durability</label>
-                                  <input v-model="r.durability.current" :id="r.internal_name + '-item-count'"
-                                    type="number" class="form-control form-control-sm ms-2" min="1"
-                                    :max="r.durability.max" step="1" size="3">
-                                </div>
-                                <input v-model="r.durability.current" type="range" class="form-range" min="1"
-                                  :max="r.durability.max" step="1">
-                              </li>
-                              <li class="list-group-item mb-3">
-                                <label :for="r.internal_name + '-select-wrapping-paper'"
-                                  class="form-label d-flex justify-content-between">
-                                  <span>Wrapping Paper</span>
-                                  <img v-if="r.wrappingPaper.color.length > 0" :src="data.getBagPicture(r)"
-                                    class="icon" />
-                                </label>
-                                <select v-model="r.wrappingPaper.color" :id="r.internal_name + '-select-wrapping-paper'"
-                                  class="form-select text-capitalize" aria-label="Select wrapping paper">
-                                  <option selected value="">None</option>
-                                  <option v-for="option in data.wrappingPaper" :value="option.color">
-                                    {{ data.getWrappingPaperName(option.internal_name) }}
-                                  </option>
-                                </select>
-                              </li>
-
-                              <li v-if="r.wrappingPaper.color.length > 0" class="list-group-item mb-3">
-                                <div class="form-check">
-                                  <input v-model="r.wrappingPaper.withName" class="form-check-input" type="checkbox"
-                                    :id="r.internal_name + '-wrapping-paper-with-name'">
-                                  <label class="form-check-label" :for="r.internal_name + '-wrapping-paper-with-name'">
-                                    With Name
-                                  </label>
-                                </div>
-                              </li>
-                            </ul>
-                            <div v-if="!r.variants" class="dropdown-divider mt-0 mb-3"></div>
-                            <div v-if="!r.variants" class="dropdown-item-text btn-group btn-group-lg ms-2" role="group"
-                              aria-label="variant selector button group">
-                              <button type="button" :class="['btn', copyText == trimItemId(calculateItemId(r)) ? 'btn-success': 
-                            'btn-outline-info']" @click="copy(trimItemId(calculateItemId(r)))">
-                                <i :class="[copyText == trimItemId(calculateItemId(r)) ? 'bi-check' : 'bi-clipboard']"
-                                  aria-hidden="true"></i>
-                              </button>
-                              <button type="button" class="btn btn-outline-info" @click="selection.add(r)">
-                                <i class="bi-plus" aria-hidden="true"></i>
-                              </button>
-                              <button type="button" class="btn btn-outline-info"
-                                @click="selection.add(r,{multiple: true})">
-                                <i class="bi-plus-square-fill" aria-hidden="true"></i>
-                              </button>
+                              </div>
                             </div>
                           </div>
                         </li>
@@ -547,11 +568,6 @@
                 </div>
               </template>
             </div>
-            <div class="d-grid gap-2 mt-4">
-              <button class="btn btn-outline-secondary" type="button" @click="importItems">
-                <i class="bi-plus-lg me-2" aria-hidden="true"></i> Import from list
-              </button>
-            </div>
           </div>
           <div v-if="search.result.length == 0" class="mt-4">
             <h2 class="h4">Keyboard Shortcuts<i class="bi-keyboard ms-2" aria-hidden="true"></i></h2>
@@ -596,12 +612,49 @@
               </tbody>
             </table>
           </div>
+          <div class="d-grid gap-2 mt-4">
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal"
+              data-bs-target="#importModal">
+              <i class="bi-plus-lg me-2" aria-hidden="true"></i> Import from list
+            </button>
+            <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel"
+              aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <form @submit.prevent="importItems">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="importModalLabel">Import from list</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="mb-3">
+                        <label for="importFormControlContent" class="form-label">Please enter the list of items</label>
+                        <textarea v-model="importContent" class="form-control" id="importFormControlContent"
+                          rows="5"></textarea>
+                      </div>
+                      <div v-if="importFailedItems.length > 0" class="mb-3">
+                        The following items have failed to be imported:
+                        <ul>
+                          <li v-for="name in importFailedItems" style="color: var(--bs-danger)">{{ name }}</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <button type="submit" class="btn btn-primary">Import</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+          </div>
           <div class="toast-container position-sticky bottom-0 start-50 translate-middle-x p-3">
             <template v-if="selected.items.length > 0">
               <div v-for="index in Math.ceil(selected.items.length / pref.item.splitBy)"
                 class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
-                  <div class="toast-body d-flex">
+                  <div class="toast-body d-flex align-items-baseline">
                     <input v-model="pref.item.itemPrefix" type="text"
                       class="form-control form-control-sm transparent-textbox" placeholder="Items:"
                       :style="{width: pref.item.itemPrefix.length + 'rem'}">
@@ -645,11 +698,11 @@
   </div>
 </body>
 
-<script src="https://cdn.jsdelivr.net/npm/vue@3.2.20/dist/vue.global.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@vueuse/shared@6.7.3/index.iife.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@vueuse/core@6.7.3/index.iife.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vueuse/shared@12.2.0/index.iife.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vueuse/core@12.2.0/index.iife.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script src="main.js" type="module"></script>
 
 </html>

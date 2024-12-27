@@ -28,7 +28,7 @@ let useHexUtil = ({ data, pref, selected }) => {
       if (fabricId != 0) bCount += (fabricId * 32);
       if (bCount > 0) b = (bCount).toString(16).toUpperCase().padStart(4, "0");
 
-      if (item.wrappingPaper.color.length > 0 && !!data.wrappingPaper) {
+      if (item?.wrappingPaper?.color?.length > 0 && !!data.wrappingPaper) {
         let color = data.wrappingPaper.find(paper => paper.color == item.wrappingPaper.color);
         if (color) c = (item.wrappingPaper.withName ? color.withName : color.hex).padStart(4, "0");
       }
@@ -65,16 +65,6 @@ let useHexUtil = ({ data, pref, selected }) => {
         r.wrappingPaper = Object.assign({}, pref.value.wrappingPaper);
         return r;
       });
-    },
-    variantTitle(item) {
-      if (item.internal_name in data.variants.internal_names)
-        return data.variants.internal_names[item.internal_name][pref.value.language];
-      else return "";
-    },
-    fabricTitle(item) {
-      if (item.internal_name in data.fabric.internal_names)
-        return data.fabric.internal_names[item.internal_name][pref.value.language];
-      else return "";
     },
     nhi: {
       import(e) {
@@ -270,6 +260,8 @@ let app = {
         });
         data.translation[to] = { raw: json, byName, byId, diyIds, etcInternalNames };
         loading.language = false;
+
+        importContent.value = sampleImportList.value;
       }
       // if (search.text.length > 0) searchItems(search.text);
     }, { debounce: 500, immediate: true });
@@ -317,10 +309,8 @@ let app = {
         search.moreThan100 = r.moreThan100;
       }
       nextTick().then(() => {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-          return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
       });
     }, { debounce: 500 });
 
@@ -375,12 +365,6 @@ let app = {
         if (cache.selected.items.length > 0) selected.value.items.push(...cache.selected.items);
         if (cache.selected.diys.length > 0) selected.value.diys.push(...cache.selected.diys);
       }
-      nextTick().then(() => {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-          return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
-      });
     }
     throttledWatch(() => ({
       text: search.text, history: selection.history, result: search.result, selected: {
@@ -390,30 +374,66 @@ let app = {
       localStorage.setItem("search-cache", JSON.stringify(to));
     }, { throttle: 500, deep: true });
 
-    let importItems = () => {
-      let list = prompt("Please enter list of items", "1x " + data.translation.TWzh.byName.entries().next().value[1]);
-      if (list == null) return;
-      list.split("\n").forEach(item => {
-        let [count, name] = item.trim().split("x "), variant = "";
-        count = Number(count);
-        if (count == 0) return;
-        // remove last bracket () or （）
-        if ([")", "）"].includes(name[name.length - 1])) {
-          let lastOpen = name.split("").findLastIndex(char => ["(", "（"].includes(char));
-          name = name.slice(0, lastOpen - 1) + name.slice(lastOpen + 1);
-          variant = name.slice(lastOpen - 1, name.length - 1).trim();
+    let variantTitle = item => {
+      if (item.internal_name in data.variants.internal_names)
+        return data.variants.internal_names[item.internal_name][pref.value.language];
+      else return "";
+    }, fabricTitle = item => {
+      if (item.internal_name in data.fabric.internal_names)
+        return data.fabric.internal_names[item.internal_name][pref.value.language];
+      else return "";
+    }, sampleImportList = computed(() => {
+      if (pref.value.language.length == 0 || !!loading.any) return "";
+      let list = "", entries = data.translation[pref.value.language].byName.entries();
+      for (let i = 0; i < 5; i++)
+        list += (i == 0 ? "" : "\n") + (i + 1) + "x " + entries.next().value[1];
+      return list;
+    }),
+      importContent = ref(""),
+      importFailedItems = reactive([]),
+      importModal = ref(null),
+      importItems = () => {
+        let list = importContent.value;
+        if (list == null || list.length == 0) return;
+        importFailedItems.splice(0, importFailedItems.length);
+        list.split("\n").forEach(item => {
+          let [count, name] = item.trim().split("x "), variant = "", originalName = name;
+          count = Number(count);
+          if (count == 0) return;
+          // remove last bracket () or （）
+          if ([")", "）"].includes(name[name.length - 1])) {
+            let lastOpen = name.split("").findLastIndex(char => ["(", "（"].includes(char));
+            variant = name.slice(lastOpen + 1, name.length - 1).trim();
+            name = name.slice(0, lastOpen).trim();
+          }
+
+          let searchExact = name => {
+            let { result } = search.byName(name);
+            return result.filter(x => x.name == name);
+          };
+          let found = searchExact(name), exact = found.at(0);
+          if (found.length == 0) { importFailedItems.push(originalName); return; }
+          if (found.length > 1) {
+            if (variant.length > 0) exact = found.find(x => x.name == name && x.color == variant);
+            if (!exact || exact.length > 1) { importFailedItems.push(originalName); return; }
+            variant = "";
+          }
+          let internal_name = exact.internal_name, ids;
+          if (variant.length > 0) {
+            let variantId = data.variants.data.find(x => x.id == internal_name && x.locale[pref.value.language] == variant).index;
+            ids = hexUtil.calculateItemId(exact, { variantId });
+          } else ids = hexUtil.calculateItemId(exact);
+          if (!ids) return;
+          for (let i = 0; i < count; i++) selection.addHex(ids);
+        });
+        if (importFailedItems.length == 0) {
+          importContent.value = sampleImportList.value;
+          importModal.value.hide();
         }
-        let { result } = search.byName(name);
-        if (result.length == 0) return;
-        let internal_name = result[0].internal_name, ids;
-        if (variant.length > 0) {
-          let variantId = data.variants.data.find(x => x.id == internal_name && x.locale[pref.value.language] == variant).index;
-          ids = hexUtil.calculateItemId(result[0], { variantId });
-        } else ids = hexUtil.calculateItemId(result[0]);
-        if (!ids) return;
-        for (let i = 0; i < count; i++) selection.addHex(ids);
-      });
-    };
+      };
+    onMounted(() => {
+      importModal.value = new bootstrap.Modal('#importModal');
+    });
 
     const title = computed(() => {
       let titles = {
@@ -457,7 +477,10 @@ let app = {
     });
     const altState = useKeyModifier("Alt");
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-    return { title, loading, search, selected, selection, pref, data, languages, ...hexUtil, ...copyUtil, altState, importItems, scrollToTop };
+    return {
+      title, loading, search, selected, selection, pref, data, languages, ...hexUtil, ...copyUtil, altState,
+      variantTitle, fabricTitle, sampleImportList, importContent, importFailedItems, importItems, scrollToTop
+    };
   },
 };
 Vue.createApp(app).mount('#app');
