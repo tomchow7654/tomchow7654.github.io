@@ -396,8 +396,16 @@ let app = {
     }, sampleImportList = computed(() => {
       if (pref.value.language.length == 0 || !!loading.any) return "";
       let list = "", entries = data.translation[pref.value.language].byName.entries();
-      for (let i = 0; i < 5; i++)
-        list += (i == 0 ? "" : "\n") + (i + 1) + "x " + entries.next().value[1];
+      for (let i = 0; i < 5; i++) {
+        const [itemId, itemName] = entries.next().value;
+        let item = search.byId(itemId), variantName = "";
+        let variants = data.variants.data.filter(v => v.id == item.internal_name);
+        if (variants.length > 0) {
+          let variant = variants[Math.floor(Math.random() * variants.length)];
+          variantName = " (" + variant.locale[pref.value.language] + ")";
+        }
+        list += (i == 0 ? "" : "\n") + (i + 1) + "x " + itemName + (i > 1 ? variantName : "");
+      }
       return list;
     }),
       importContent = ref(""),
@@ -408,34 +416,41 @@ let app = {
         if (list == null || list.length == 0) return;
         importFailedItems.splice(0, importFailedItems.length);
         list.split("\n").forEach(item => {
-          let [count, name] = item.trim().split("x "), variant = "", originalName = name;
-          count = Number(count);
-          if (count == 0) return;
-          // remove last bracket () or （）
-          if ([")", "）"].includes(name[name.length - 1])) {
-            let lastOpen = name.split("").findLastIndex(char => ["(", "（"].includes(char));
-            variant = name.slice(lastOpen + 1, name.length - 1).trim();
-            name = name.slice(0, lastOpen).trim();
-          }
+          const originalName = item.trim().split("x ").at(-1);
+          try {
+            let [count, name] = item.trim().split("x "), variantText = "";
+            count = Number(count);
+            if (count == 0) return;
+            // remove last bracket () or （）
+            if ([")", "）"].includes(name[name.length - 1])) {
+              let lastOpen = name.split("").findLastIndex(char => ["(", "（"].includes(char));
+              variantText = name.slice(lastOpen + 1, name.length - 1).trim();
+              name = name.slice(0, lastOpen).trim();
+            }
 
-          let searchExact = name => {
-            let { result } = search.byName(name);
-            return result.filter(x => x.name == name);
-          };
-          let found = searchExact(name), exact = found.at(0);
-          if (found.length == 0) { importFailedItems.push(originalName); return; }
-          if (found.length > 1) {
-            if (variant.length > 0) exact = found.find(x => x.name == name && x.color == variant);
-            if (!exact || exact.length > 1) { importFailedItems.push(originalName); return; }
-            variant = "";
+            let searchExact = name => {
+              let { result } = search.byName(name);
+              return result.filter(x => x.name == name);
+            };
+            let found = searchExact(name), exact = found.at(0);
+            if (found.length == 0) throw new Error(`Item ${name} not found.`);
+            if (found.length > 1) {
+              if (variantText.length > 0) exact = found.find(x => x.name == name && x.color == variantText);
+              if (!exact || exact.length > 1) throw new Error(`Variant ${variantText} not found for item ${name}.`);
+              variantText = "";
+            }
+            let internal_name = exact.internal_name, ids;
+            if (variantText.length > 0) {
+              const variant = data.variants.data.find(x => x.id == internal_name && x.locale[pref.value.language] == variantText);
+              if (variant) ids = hexUtil.calculateItemId(exact, { variantId: variant.index });
+              else throw new Error(`Variant ${variantText} not found for item ${name}.`);
+            } else ids = hexUtil.calculateItemId(exact);
+            if (!ids) return;
+            for (let i = 0; i < count; i++) selection.addHex(ids);
+          } catch (err) {
+            console.error(err);
+            importFailedItems.push(originalName);
           }
-          let internal_name = exact.internal_name, ids;
-          if (variant.length > 0) {
-            let variantId = data.variants.data.find(x => x.id == internal_name && x.locale[pref.value.language] == variant).index;
-            ids = hexUtil.calculateItemId(exact, { variantId });
-          } else ids = hexUtil.calculateItemId(exact);
-          if (!ids) return;
-          for (let i = 0; i < count; i++) selection.addHex(ids);
         });
         if (importFailedItems.length == 0) {
           importContent.value = sampleImportList.value;
