@@ -1,13 +1,26 @@
 const { ref, computed, reactive, onMounted, watch, watchEffect, nextTick } = Vue;
 const { throttledWatch, debouncedWatch, useMagicKeys, useKeyModifier, templateRef, whenever, useActiveElement, and,
-  useRefHistory, useLocalStorage } = VueUse;
+  useRefHistory, useLocalStorage, useEventListener } = VueUse;
 
 let useHexUtil = ({ data, pref, selected }) => {
   let hexUtil = {
-    otherInformation(item) {
-      if (item.internal_name && item.internal_name.includes("Fake")) return " (Fake)";
-      else if (item.color) return " (" + item.color + ")";
-      return "";
+    otherInformation({ internal_name, color }, ids) {
+      if (internal_name && internal_name.includes("Fake")) return " (Fake)";
+      else if (color) return " (" + color + ")";
+      if (!ids) return "";
+      const hasVariant = parseInt(ids[1].slice(-1), 16) > 0,
+        hasFabric = parseInt(ids[1].slice(-2, -1), 16) > 0;
+      let variantName = "", fabricName = "";
+      if (hasVariant) {
+        let variant = data.variants.data.find(v => v.id == internal_name && v.index == parseInt(ids[1].slice(-1), 16));
+        if (variant) variantName = "(" + variant.locale[pref.value.language] + ")";
+      }
+      if (hasFabric) {
+        let fabricIndex = (parseInt(ids[1].slice(-2), 16) - parseInt(ids[1].slice(-1), 16)) / 32;
+        let fabric = data.fabric.data.find(v => v.id == internal_name && v.index == fabricIndex);
+        if (fabric) fabricName = " (" + fabric.locale[pref.value.language] + ")";
+      }
+      return variantName + fabricName;
     },
     calculateItemId(item, opt = {}) {
       let variantId = (opt && opt.variantId) ? Number(opt.variantId) : -1,
@@ -308,13 +321,10 @@ let app = {
         search.result = hexUtil.injectItemData(r.result);
         search.moreThan100 = r.moreThan100;
       }
-      nextTick().then(() => {
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-      });
+      initTooltips();
     }, { debounce: 500 });
 
-    const { undo, redo, canUndo, canRedo } = useRefHistory(selected, { deep: true, capacity: 15 });
+    const { undo, redo, canUndo, canRedo, clear } = useRefHistory(selected, { deep: true, capacity: 15 });
     let selection = {
       add(item, opt = {}) {
         let variantId = (opt && opt.variantId) ? opt.variantId : "",
@@ -337,7 +347,7 @@ let app = {
         };
       },
       history: reactive([]),
-      undo, redo, canUndo: ref(canUndo), canRedo: ref(canRedo),
+      undo, redo, canUndo: computed(() => canUndo), canRedo: computed(() => canRedo),
       join(items) {
         return items.map(i => hexUtil.trimItemId(i)).join(" ");
       },
@@ -354,7 +364,7 @@ let app = {
             splited.push(selected.value.diys.slice(i, i + pref.value.item.splitBy));
           return splited;
         })
-      })
+      }),
     };
     let cache = JSON.parse(localStorage.getItem("search-cache"));
     if (cache) {
@@ -364,6 +374,7 @@ let app = {
       if (cache.selected) {
         if (cache.selected.items.length > 0) selected.value.items.push(...cache.selected.items);
         if (cache.selected.diys.length > 0) selected.value.diys.push(...cache.selected.diys);
+        clear();
       }
     }
     throttledWatch(() => ({
@@ -433,7 +444,15 @@ let app = {
       };
     onMounted(() => {
       importModal.value = new bootstrap.Modal('#importModal');
+      initTooltips();
     });
+    const initTooltips = async () => {
+      await nextTick();
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+      // const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+      // const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+    };
 
     const title = computed(() => {
       let titles = {
@@ -455,7 +474,7 @@ let app = {
       let box = searchBox.value;
       box.focus(); box.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
     });
-    const activeElement = useActiveElement()
+    const activeElement = useActiveElement();
     const notUsingInput = computed(() => !["INPUT", "TEXTAREA"].includes(activeElement.value.tagName));
     watchEffect(() => {
       for (let i = 1; i <= 9; i++)
@@ -475,8 +494,21 @@ let app = {
         else if (keys["Ctrl+Y"].value || keys["Ctrl+Shift+Z"].value) selection.redo();
       }
     });
+    watch(() => selected.value.items.length + selected.value.diys.length, initTooltips, { immediate: true });
     const altState = useKeyModifier("Alt");
-    const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+    const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' }),
+      importFormControlContent = templateRef("importFormControlContent");
+
+    useEventListener(searchBox, "paste", event => {
+      const txt = (event.clipboardData || window.clipboardData).getData("text"),
+        isMultiLine = txt.includes("\n");
+      if (isMultiLine) {
+        importModal.value.show();
+        event.preventDefault();
+        importContent.value = txt;
+        nextTick().then(r => importFormControlContent.value.focus());
+      }
+    });
     return {
       title, loading, search, selected, selection, pref, data, languages, ...hexUtil, ...copyUtil, altState,
       variantTitle, fabricTitle, sampleImportList, importContent, importFailedItems, importItems, scrollToTop
@@ -484,5 +516,76 @@ let app = {
   },
 };
 Vue.createApp(app).mount('#app');
+
+const getStoredTheme = () => localStorage.getItem('theme')
+const setStoredTheme = theme => localStorage.setItem('theme', theme)
+
+const getPreferredTheme = () => {
+  const storedTheme = getStoredTheme()
+  if (storedTheme) {
+    return storedTheme
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
+const setTheme = theme => {
+  if (theme === 'auto') {
+    document.documentElement.setAttribute('data-bs-theme', (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
+  } else {
+    document.documentElement.setAttribute('data-bs-theme', theme)
+  }
+}
+
+setTheme(getPreferredTheme())
+
+const showActiveTheme = (theme, focus = false) => {
+  const themeSwitcher = document.querySelector('#bd-theme')
+
+  if (!themeSwitcher) {
+    return
+  }
+
+  const themeSwitcherText = document.querySelector('#bd-theme-text')
+  const activeThemeIcon = document.querySelector('.theme-icon-active use')
+  const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
+  const svgOfActiveBtn = btnToActive.querySelector('svg use').getAttribute('href')
+
+  document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
+    element.classList.remove('active')
+    element.setAttribute('aria-pressed', 'false')
+  })
+
+  btnToActive.classList.add('active')
+  btnToActive.setAttribute('aria-pressed', 'true')
+  activeThemeIcon.setAttribute('href', svgOfActiveBtn)
+  const themeSwitcherLabel = `${themeSwitcherText.textContent} (${btnToActive.dataset.bsThemeValue})`
+  themeSwitcher.setAttribute('aria-label', themeSwitcherLabel)
+
+  if (focus) {
+    themeSwitcher.focus()
+  }
+}
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  const storedTheme = getStoredTheme()
+  if (storedTheme !== 'light' && storedTheme !== 'dark') {
+    setTheme(getPreferredTheme())
+  }
+})
+
+window.addEventListener('DOMContentLoaded', () => {
+  showActiveTheme(getPreferredTheme())
+
+  document.querySelectorAll('[data-bs-theme-value]')
+    .forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const theme = toggle.getAttribute('data-bs-theme-value')
+        setStoredTheme(theme)
+        setTheme(theme)
+        showActiveTheme(theme, true)
+      })
+    })
+})
 
 export default app;

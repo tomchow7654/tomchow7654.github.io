@@ -2,16 +2,17 @@
 
 body {
   font-size: 1rem;
+  overflow-x: hidden;
 }
 
 body,
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		font-family: 'Noto Sans TC', sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Noto Sans TC', sans-serif;
 }
 
 [v-cloak] {
@@ -35,8 +36,10 @@ img.icon {
   bottom: 0;
   /* rtl:remove */
   left: 0;
-  z-index: 100; /* Behind the navbar */
-  padding: 48px 0 0; /* Height of navbar */
+  z-index: 100;
+  /* Behind the navbar */
+  padding: 48px 0 0;
+  /* Height of navbar */
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
 }
 
@@ -52,7 +55,8 @@ img.icon {
   height: calc(100vh - 48px);
   padding-top: .5rem;
   overflow-x: hidden;
-  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+  overflow-y: auto;
+  /* Scrollable contents if viewport is shorter than content. */
 }
 
 .sidebar .nav-link {
@@ -86,8 +90,6 @@ img.icon {
   padding-top: .75rem;
   padding-bottom: .75rem;
   font-size: 1rem;
-  background-color: rgba(0, 0, 0, .25);
-  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
 }
 
 .navbar .navbar-toggler {
@@ -155,5 +157,5 @@ img.icon {
 }
 
 .underline-first-letter:first-letter {
-  text-decoration:underline;
+  text-decoration: underline;
 }
