@@ -1,6 +1,6 @@
 const { ref, computed, reactive, onMounted, watch, watchEffect, nextTick } = Vue;
 const { throttledWatch, debouncedWatch, useMagicKeys, useKeyModifier, templateRef, whenever, useActiveElement, and,
-  useRefHistory, useLocalStorage, useEventListener } = VueUse;
+  useRefHistory, useLocalStorage, useEventListener, useDebounceFn } = VueUse;
 
 let useHexUtil = ({ data, pref, selected }) => {
   let hexUtil = {
@@ -67,8 +67,10 @@ let useHexUtil = ({ data, pref, selected }) => {
             max: data.durability[toolIndex].durability
           };
 
-          if (r.internal_name in data.variants.internal_names)
+          if (r.internal_name in data.variants.internal_names) {
             r.variants = data.variants.data.filter(variant => variant.id == r.internal_name);
+            r.variantSelected = 0;
+          }
 
           if (r.internal_name in data.fabric.internal_names) {
             r.fabric = data.fabric.data.filter(fabric => fabric.id == r.internal_name);
@@ -295,6 +297,7 @@ let app = {
       text: "",
       result: [],
       moreThan100: false,
+      debouncing: false,
     });
     search.byName = (name, language) => {
       let result = [], moreThan100 = false;
@@ -315,14 +318,18 @@ let app = {
       if (id.length == 4) return data.translation[language].byId.get(id);
       else return null;
     };
-    debouncedWatch(() => search.text, to => {
-      if (pref.value.language.length > 0 && !loading.language) {
-        let r = search.byName(to);
-        search.result = hexUtil.injectItemData(r.result);
-        search.moreThan100 = r.moreThan100;
-      }
+    watch(() => search.text, to => {
+      if (pref.value.language.length == 0 || loading.language) return;
+      search.debouncing = true;
+      onSearchText(to);
+    });
+    let onSearchText = useDebounceFn(txt => {
+      let r = search.byName(txt);
+      search.result = hexUtil.injectItemData(r.result);
+      search.moreThan100 = r.moreThan100;
+      search.debouncing = false;
       initTooltips();
-    }, { debounce: 500 });
+    }, 500);
 
     const { undo, redo, canUndo, canRedo, clear } = useRefHistory(selected, { deep: true, capacity: 15 });
     let selection = {
@@ -339,8 +346,9 @@ let app = {
           if (this.history.length > 5) this.history.splice(5);
         };
       },
-      addHex(ids) {
-        selected.value.items.push(ids);
+      addHex(ids, index) {
+        if (!!index || index == 0) selected.value.items.splice(index, 0, ids);
+        else selected.value.items.push(ids);
         if (!this.history.some(x => x.length == ids.length && x.every((v, i) => v === ids[i]))) {
           this.history.unshift(ids);
           if (this.history.length > 5) this.history.splice(5);
@@ -457,8 +465,57 @@ let app = {
           importModal.value.hide();
         }
       };
+
+    let changeItemVariantModal = ref(null),
+      changeItem = ref(null),
+      changeItemIndex = ref(-1),
+      changeItemVariants = ref([]),
+      changeItemFabrics = ref([]),
+      changeItemVariant = (i, j) => {
+        let ids = selection.splited.items[i][j],
+          item = search.byId(ids.at(-1));
+        changeItem.value = hexUtil.injectItemData([item])[0];
+        changeItemIndex.value = i * pref.value.item.splitBy + j;
+
+        let variants = data.variants.data.filter(v => v.id == item.internal_name);
+        changeItemVariants.value = variants;
+        let fabrics = data.fabric.data.filter(v => v.id == item.internal_name);
+        changeItemFabrics.value = fabrics;
+
+        const hasVariant = parseInt(ids[1].slice(-1), 16) > 0,
+          hasFabric = parseInt(ids[1].slice(-2, -1), 16) > 0;
+        if (hasVariant) {
+          let variant = variants.find(v => v.index == parseInt(ids[1].slice(-1), 16));
+          if (variant) changeItem.value.variantSelected = variant.index;
+        }
+        if (hasFabric) {
+          let fabricIndex = (parseInt(ids[1].slice(-2), 16) - parseInt(ids[1].slice(-1), 16)) / 32;
+          let fabric = fabrics.find(v => v.index == fabricIndex);
+          if (fabric) changeItem.value.fabricSelected = fabricIndex;
+        }
+
+        changeItemVariantModal.value.show();
+      }, submitChangeItemVariant = () => {
+        let ids = hexUtil.calculateItemId(changeItem.value, { variantId: changeItem.value.variantSelected });
+        selected.value.items.splice(changeItemIndex.value, 1);
+        selection.addHex(ids, Math.max(0, changeItemIndex.value));
+        changeItemVariantModal.value.hide();
+      },
+      removeSelectedItem = () => {
+        selected.value.items.splice(changeItemIndex.value, 1);
+        changeItemVariantModal.value.hide();
+      }, variantsAvailable = ids => {
+        return false;
+        let item = search.byId(ids.at(-1));
+        return !!item && data.variants.data.some(v => v.id == item.internal_name);
+      }, fabricsAvailable = ids => {
+        return false;
+        let item = search.byId(ids.at(-1));
+        return !!item && data.fabric.data.some(v => v.id == item.internal_name);
+      };
     onMounted(() => {
       importModal.value = new bootstrap.Modal('#importModal');
+      changeItemVariantModal.value = new bootstrap.Modal('#changeItemVariantModal');
       initTooltips();
     });
     const initTooltips = async () => {
@@ -526,7 +583,9 @@ let app = {
     });
     return {
       title, loading, search, selected, selection, pref, data, languages, ...hexUtil, ...copyUtil, altState,
-      variantTitle, fabricTitle, sampleImportList, importContent, importFailedItems, importItems, scrollToTop
+      variantTitle, fabricTitle, sampleImportList, importContent, importFailedItems, importItems, scrollToTop,
+      changeItemVariant, changeItem, changeItemVariants, changeItemFabrics, submitChangeItemVariant, removeSelectedItem,
+      variantsAvailable, fabricsAvailable,
     };
   },
 };

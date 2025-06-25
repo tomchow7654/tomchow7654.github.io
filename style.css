@@ -159,3 +159,31 @@ img.icon {
 .underline-first-letter:first-letter {
   text-decoration: underline;
 }
+
+.variants-available {
+  position: relative;
+
+  &::before {
+    position: absolute;
+    left: 0.25rem;
+    bottom: 0;
+    height: 0;
+    width: calc(40% - 0.25rem);
+    content: '';
+    border-top: 4px solid #74e0aa;
+  }
+}
+
+.fabrics-available {
+  position: relative;
+
+  &::after {
+    position: absolute;
+    right: 0.25rem;
+    bottom: 0;
+    height: 0;
+    width: calc(40% - 0.25rem);
+    content: '';
+    border-top: 4px solid #c4d9a9;
+  }
+}
