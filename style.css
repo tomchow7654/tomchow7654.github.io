@@ -45,7 +45,8 @@ img.icon {
 
 @media (max-width: 767.98px) {
   .sidebar {
-    /* top: 5rem; */
+    background-color: var(--bs-body-bg);
+    border-right: 1px solid var(--bs-border-color);
   }
 }
 
@@ -186,4 +187,15 @@ img.icon {
     content: '';
     border-top: 4px solid #c4d9a9;
   }
+}
+
+/* Theme picker styles */
+.dropdown-item.active i:last-child,
+.dropdown-item[aria-pressed="true"] i:last-child {
+  display: block !important;
+}
+
+/* Toast container */
+.toast-container {
+  max-height: 50dvh;
 }

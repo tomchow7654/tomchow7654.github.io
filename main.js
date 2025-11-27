@@ -521,7 +521,11 @@ let app = {
     const initTooltips = async () => {
       await nextTick();
       const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => {
+        let args = [tooltipTriggerEl];
+        if (tooltipTriggerEl.nodeName == "BUTTON") args.push({ trigger: "hover" });
+        return new bootstrap.Tooltip(...args);
+      });
       // const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
       // const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
     };
@@ -621,9 +625,9 @@ const showActiveTheme = (theme, focus = false) => {
   }
 
   const themeSwitcherText = document.querySelector('#bd-theme-text')
-  const activeThemeIcon = document.querySelector('.theme-icon-active use')
+  const activeThemeIcon = document.querySelector('.theme-icon-active')
   const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
-  const svgOfActiveBtn = btnToActive.querySelector('svg use').getAttribute('href')
+  const iconOfActiveBtn = btnToActive.querySelector('i').className
 
   document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
     element.classList.remove('active')
@@ -632,7 +636,7 @@ const showActiveTheme = (theme, focus = false) => {
 
   btnToActive.classList.add('active')
   btnToActive.setAttribute('aria-pressed', 'true')
-  activeThemeIcon.setAttribute('href', svgOfActiveBtn)
+  activeThemeIcon.className = iconOfActiveBtn + ' theme-icon-active'
   const themeSwitcherLabel = `${themeSwitcherText.textContent} (${btnToActive.dataset.bsThemeValue})`
   themeSwitcher.setAttribute('aria-label', themeSwitcherLabel)
 
