@@ -1,6 +1,3 @@
-[submodule "ACNH"]
-	path = ACNH
-	url = https://github.com/phecdaDia/ACNH.git
 [submodule "acnh-translations"]
 	path = acnh-translations
 	url = https://gitlab.com/AeonSake2/acnh-translations.git
