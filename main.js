@@ -574,6 +574,9 @@ let app = {
     const altState = useKeyModifier("Alt");
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' }),
       importFormControlContent = templateRef("importFormControlContent");
+    const removeAllTooltip = () => nextTick().then(r => {
+      document.querySelectorAll(".bs-tooltip-auto").forEach(t => t.remove());
+    });
 
     useEventListener(searchBox, "paste", event => {
       const txt = (event.clipboardData || window.clipboardData).getData("text"),
@@ -589,7 +592,7 @@ let app = {
       title, loading, search, selected, selection, pref, data, languages, ...hexUtil, ...copyUtil, altState,
       variantTitle, fabricTitle, sampleImportList, importContent, importFailedItems, importItems, scrollToTop,
       changeItemVariant, changeItem, changeItemVariants, changeItemFabrics, submitChangeItemVariant, removeSelectedItem,
-      variantsAvailable, fabricsAvailable,
+      variantsAvailable, fabricsAvailable, removeAllTooltip
     };
   },
 };

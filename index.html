@@ -411,7 +411,7 @@
                           </button>
                         </li>
                         <li class="nav-item">
-                          <button type="button" class="btn btn-lg text-primary" @click="selection.add(r)"
+                          <button type="button" class="btn btn-lg text-primary" @click="selection.add(r); removeAllTooltip();"
                             data-bs-toggle="tooltip" data-bs-placement="top" title="Add to selected">
                             <i class="bi-plus" aria-hidden="true"></i>
                           </button>
@@ -575,7 +575,7 @@
                         </li>
                         <li class="nav-item">
                           <button type="button" class="btn btn-lg text-secondary" @click="selection.add(r, {isDiy: true, 
-                           command : (pref.item.diySeparateCmd ? 'diy' : 'drop')})">
+                           command : (pref.item.diySeparateCmd ? 'diy' : 'drop')}); removeAllTooltip();">
                             <i class="bi-plus" aria-hidden="true" data-bs-toggle="tooltip" data-bs-placement="top"
                               title="Add to selected"></i>
                           </button>
